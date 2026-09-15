@@ -1,0 +1,14 @@
+# A faster linker is the single biggest improvement to edit-compile-test latency, but needs a tool
+# that is not installed by default.
+#
+# Linux, after installing mold:
+# [target.x86_64-unknown-linux-gnu]
+# linker = "clang"
+# rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+#
+# macOS: the bundled ld-prime is already fast; nothing to configure.
+
+# Uncomment to build for the host CPU. Faster, but the result is not portable, so keep it out of
+# anything you ship and out of CI.
+# [build]
+# rustflags = ["-C", "target-cpu=native"]

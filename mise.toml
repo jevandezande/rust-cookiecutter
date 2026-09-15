@@ -1,0 +1,79 @@
+# Dev environment and task definitions for the cookiecutter itself. The template body ships its own
+# mise.toml, which is the one generated projects use.
+#
+# `depends` runs in parallel; a `run` array runs in series.
+
+[settings]
+lockfile = true
+
+[tools]
+uv = "latest"
+
+[env]
+_.file = ".env"
+
+# Puts .venv on PATH, so tasks need no `uv run` prefix
+_.python.venv = { path = ".venv", create = true }
+
+UV_LOCKED = "1"
+
+[hooks]
+enter = "uv sync --quiet"
+
+# ---------- Python ----------
+
+[tasks.lock-check]
+run = "uv lock --check"
+
+# UV_LOCKED is on for every other task, so re-resolving needs an explicit opt-out. Task-level env
+# beats [env], and needs no shell-specific prefix.
+[tasks.lock]
+description = "Re-resolve uv.lock after editing dependencies"
+env = { UV_LOCKED = "0" }
+run = "uv lock"
+
+[tasks.lock-upgrade]
+description = "Bump uv.lock to the newest compatible versions"
+env = { UV_LOCKED = "0" }
+run = "uv lock --upgrade"
+
+[tasks.fmt]
+run = "ruff format hooks"
+
+[tasks.fmt-check]
+run = "ruff format --check hooks"
+
+[tasks.lint]
+run = "ruff check hooks"
+
+[tasks.types]
+run = "ty check hooks"
+
+[tasks.test]
+run = "pytest"
+
+# ---------- Markdown ----------
+
+[tasks.md-fmt]
+run = "rumdl fmt ."
+
+[tasks.md-fmt-check]
+run = "rumdl fmt --check ."
+
+[tasks.md-check]
+run = "rumdl check ."
+
+# ---------- Aggregates ----------
+
+[tasks.fix]
+description = "Rewrite what can be fixed automatically"
+run = ["mise run fmt", "mise run md-fmt"]
+
+[tasks.check]
+description = "Report only, safe for CI"
+depends = ["lock-check"]
+run = "mise run fmt-check ::: lint ::: types ::: md-fmt-check ::: md-check"
+
+[tasks.all]
+depends = ["check"]
+run = "mise run test"

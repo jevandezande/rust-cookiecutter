@@ -1,0 +1,11 @@
+## No Python interop
+
+This workspace is pure Rust: no pyo3, no embedded interpreter, no extension module, nothing that
+imports a Python package. `pyproject.toml` exists for the dev tooling alone: the `ruff`, `ty`,
+and `pytest` that `mise` runs over the toolchain helpers in `scripts/`.
+
+Logic lives in `crates/core`, written against traits, so it compiles and tests on its own and an
+implementation can be swapped without touching callers.
+{% if cookiecutter.crate_type != 'lib' %}
+`crates/cli` is a thin binary over that core; logic does not live there.
+{% endif %}

@@ -1,0 +1,38 @@
+{%- set pkg = cookiecutter.__package_name -%}
+{%- set crate = cookiecutter.crate_name -%}
+[package]
+name = "{{crate}}-python"
+description = "Python extension module for {{cookiecutter.project_name}}"
+# A cdylib is dead weight on crates.io; the wheel is what ships
+publish = false
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+readme.workspace = true
+keywords.workspace = true
+{%- if cookiecutter.license != 'None' %}
+license.workspace = true
+{%- endif %}
+repository.workspace = true
+
+[lib]
+# Imported from Python as `{{pkg}}._core`
+name = "_core"
+crate-type = ["cdylib"]
+bench = false
+# The pytest suite in `tests/` covers this crate. A Rust test harness would be the one binary in
+# the workspace that loads libpython at run time, and on Windows nothing puts the DLL in reach
+test = false
+doctest = false
+
+[dependencies]
+{{crate}} = { workspace = true }
+# abi3 gives one wheel across Python versions, and builds with no interpreter present.
+# `extension-module` is deliberately not here and not a default feature: it omits the libpython
+# symbols, which is right for a wheel and a link error for every test binary in the workspace.
+# maturin turns it on itself, from `[tool.maturin] features` in pyproject.toml
+pyo3 = { workspace = true, features = ["abi3-py313"] }
+
+[lints]
+workspace = true

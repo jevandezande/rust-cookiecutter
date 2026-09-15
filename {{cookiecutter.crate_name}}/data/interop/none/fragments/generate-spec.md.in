@@ -1,0 +1,1 @@
+Crate placement: logic in `crates/core`{% if cookiecutter.crate_type != 'lib' %}; `crates/cli` stays thin{% endif %}.

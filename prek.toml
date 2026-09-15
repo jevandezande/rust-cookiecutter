@@ -1,0 +1,79 @@
+#:schema https://www.schemastore.org/prek.json
+exclude = '\.venv/'
+default_stages = ["pre-commit", "pre-push"]
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-toml", exclude = '\{\{cookiecutter\.crate_name\}\}/.*(Cargo|pyproject|mise)\.toml', priority = 0 },
+    { id = "check-yaml", exclude = '\{\{cookiecutter\.crate_name\}\}/\.github/workflows/test\.yml', priority = 0 },
+    { id = "check-merge-conflict", priority = 0 },
+    { id = "end-of-file-fixer", priority = 0 },
+    { id = "trailing-whitespace", priority = 0 },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "uv-lock-check"
+name = "uv lock --check"
+language = "system"
+entry = "uv lock --check"
+files = '^(pyproject\.toml|uv\.lock)$'
+pass_filenames = false
+priority = 5
+
+[[repos.hooks]]
+id = "rumdl-fmt"
+name = "rumdl fmt"
+language = "system"
+entry = "uv run rumdl fmt ."
+types = ["markdown"]
+pass_filenames = false
+priority = 10
+
+[[repos.hooks]]
+id = "rumdl-check"
+name = "rumdl check"
+language = "system"
+entry = "uv run rumdl check ."
+types = ["markdown"]
+pass_filenames = false
+priority = 11
+
+[[repos.hooks]]
+id = "ruff-format"
+name = "ruff format"
+language = "system"
+entry = "uv run ruff format hooks"
+types_or = ["python", "pyi"]
+pass_filenames = false
+priority = 30
+
+[[repos.hooks]]
+id = "ruff-check"
+name = "ruff check"
+language = "system"
+entry = "uv run ruff check hooks --fix"
+types_or = ["python", "pyi"]
+pass_filenames = false
+priority = 31
+
+[[repos.hooks]]
+id = "ty"
+name = "ty"
+language = "system"
+entry = "uv run ty check hooks"
+types_or = ["python", "pyi"]
+pass_filenames = false
+priority = 32
+
+[[repos.hooks]]
+id = "pytest"
+name = "pytest"
+language = "system"
+entry = "uv run pytest"
+always_run = true
+pass_filenames = false
+priority = 41

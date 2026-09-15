@@ -1,0 +1,15 @@
+## Python boundary
+
+- `crates/py` is the only crate that links libpython. Keep it thin: import, convert, return.
+- Never enable pyo3's `extension-module` feature.
+- Cache callables. Do not `getattr` on the hot path.
+- `Scorer::score_all` must cross into Python once with the whole batch. Do not attach once and
+  still call Python per element. For numpy/scipy/torch, pass a buffer or array, not a `PyList`
+  of scalars.
+- Do not `rayon` over a `PyScorer`. The GIL makes that slower than a loop.
+- `bootstrap()` must run before the first `Python::attach`. Do not remove it. A `dist/bin` +
+  `dist/python` layout must not honor `$VIRTUAL_ENV`.
+- The workspace's only `unsafe` is `bootstrap` setting environment variables.
+- `stage_python_dlls()` in `crates/py/build.rs` is required on Windows. Do not delete it.
+- Do not add first-party `.py` files. Third-party packages go in `[project.dependencies]` via
+  `uv add`, then `import_fn` in `crates/py`.

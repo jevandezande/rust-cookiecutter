@@ -1,0 +1,6 @@
+## 3. The Python Boundary
+
+- The Python boundary is tested in `crates/py`. pytest covers `scripts/` (bundle helpers), not first-party Python modules.
+- `crates/core` tests must not start an interpreter. Drive traits with a pure-Rust fake.
+- `crates/py` tests cover embedding: happy path, Python exceptions with a traceback, batch vs per-element, and a few threads sharing one scorer.
+- Do not add `rayon` over a `PyScorer`; the GIL makes that slower than a loop. Batch instead.

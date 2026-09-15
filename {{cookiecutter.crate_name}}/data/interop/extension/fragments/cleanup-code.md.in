@@ -1,0 +1,1 @@
+   - Keep `crates/core` free of pyo3, and `crates/py` free of logic.

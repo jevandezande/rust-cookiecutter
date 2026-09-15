@@ -1,0 +1,50 @@
+## Calling Python from Rust
+
+This workspace embeds CPython: Rust starts an interpreter and calls into it. It is not a Python
+extension module. There is no maturin, no wheel, no `cdylib`, and no `.pyi` stub.
+{%- if cookiecutter.crate_type != 'lib' %}
+
+```sh
+mise run bundle          # self-contained dist/ (binary + interpreter)
+mise run smoke-bundle    # prove the bundle ignores VIRTUAL_ENV
+```
+
+{%- endif %}
+
+The files that carry the interop:
+
+- `crates/py/` - embedded-Python interop; the only crate that links libpython
+- `scripts/` - bundle and MSRV helpers
+- `pyproject.toml` - `[project.dependencies]` (packages Rust imports) plus the `dev` group and
+  ruff/ty/pytest configuration. It has no `[build-system]`: this is not a Python distribution, so
+  uv installs those packages without trying to build the project.
+
+Rules that matter when editing it:
+
+- `crates/core` must stay free of pyo3. Anything it needs from Python is a trait, implemented in
+  `crates/py`. Put logic in `core`, not in the interop layer.
+- Never enable pyo3's `extension-module` feature. It omits the libpython symbols, which is right
+  for a wheel and a link error for a binary.
+- The CLI's `python` feature is on by default and pulls in `crates/py`. `--no-default-features`
+  builds a pure-Rust binary that does not link libpython. `--no-python` skips the interpreter at
+  runtime on a default build.
+- Prefer Rust. To use a PyPI package: `uv add <pkg>` (lands in `[project.dependencies]`), then
+  `import_fn` in `crates/py`. Do not add `.py` files. Write a short adapter only if the
+  third-party API cannot reasonably be called from Rust (object graphs you must keep alive,
+  callbacks).
+- `bootstrap()` in `crates/py/src/lib.rs` sets `PYTHONHOME`; without it the interpreter cannot
+  find its own stdlib. In development it also restores the virtualenv's `site-packages`. A bundled
+  `dist/bin` + `dist/python` layout does not, so `$VIRTUAL_ENV` cannot shadow vendored packages.
+  Do not remove it, and keep the environment writes inside the `OnceLock`.
+- The workspace uses `unsafe_code = "deny"` rather than `forbid` only so that bootstrap can call
+  `std::env::set_var`. Any new `unsafe` needs a `// SAFETY:` comment and a good reason.
+- `mise run bundle` (CLI workspaces only) builds a self-contained `dist/` and vendors
+  `[project.dependencies]` into it. If you change the layout it produces, update
+  `classify_bundle()` in `crates/py/src/lib.rs` to match.
+- `stage_python_dlls()` in `crates/py/build.rs` makes `cargo test` work on Windows, which has no
+  rpath. Do not remove it; without it every embedding binary dies with `STATUS_DLL_NOT_FOUND`
+  before `main` runs.
+
+pyo3 links against whatever interpreter it discovers. `mise.toml` activates `.venv`, so inside
+`mise run` (and in any shell where mise is active) the discovered interpreter is this project's.
+Outside that, set `PYO3_PYTHON` explicitly.

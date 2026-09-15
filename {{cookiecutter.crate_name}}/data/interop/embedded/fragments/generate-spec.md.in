@@ -1,0 +1,1 @@
+Crate placement: logic in `crates/core`; Python interop only in `crates/py`.

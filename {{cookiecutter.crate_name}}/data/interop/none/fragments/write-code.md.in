@@ -1,0 +1,6 @@
+## No Python interop
+
+- No pyo3, no `Python::attach`, no `PYO3_*` env, anywhere in the workspace.
+- Do not add first-party `.py` files. The Python here is the toolchain helpers in `scripts/` and
+  the dev tooling that checks them.
+- Logic lives in `crates/core`, written against traits{% if cookiecutter.crate_type != 'lib' %}; `crates/cli` stays a thin binary and holds no logic{% endif %}.

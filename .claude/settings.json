@@ -1,0 +1,17 @@
+{
+  "includeCoAuthoredBy": false,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-sync ruff format --quiet hooks && uv run --no-sync ruff check hooks",
+            "statusMessage": "Formatting and linting with ruff"
+          }
+        ]
+      }
+    ]
+  }
+}

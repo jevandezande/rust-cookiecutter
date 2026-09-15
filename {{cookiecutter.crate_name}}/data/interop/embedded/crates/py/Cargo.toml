@@ -1,0 +1,36 @@
+{%- set crate = cookiecutter.crate_name -%}
+[package]
+name = "{{crate}}-python"
+description = "Embedded Python interop for {{cookiecutter.project_name}}"
+build = "build.rs"
+links = "{{crate}}-python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+readme.workspace = true
+keywords.workspace = true
+{%- if cookiecutter.license != 'None' %}
+license.workspace = true
+{%- endif %}
+repository.workspace = true
+
+[lib]
+bench = false
+
+[dependencies]
+{{crate}} = { workspace = true }
+pyo3 = { workspace = true, features = ["auto-initialize"] }
+
+[build-dependencies]
+pyo3-build-config = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "boundary"
+harness = false
+
+[lints]
+workspace = true

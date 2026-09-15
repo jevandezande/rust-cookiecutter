@@ -1,0 +1,139 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+  # Re-run a release against the same tag without re-tagging; picked against a branch, the
+  # version job stops it before anything is uploaded
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  version:
+    name: Verify tag matches the workspace version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # The README says bump first and tag second; this is what enforces it
+      - shell: bash
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["workspace"]["package"]["version"])')
+          tag=${GITHUB_REF_NAME#v}
+          if [ "$version" != "$tag" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+
+  # What test.yml runs on every push, repeated here so a tag on a commit CI never saw cannot
+  # publish untested
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: version
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
+
+      - uses: jdx/mise-action@v4.3.0
+      - uses: Swatinem/rust-cache@v2.9.2
+
+      - run: uv sync --locked
+
+      # Pin the interpreter crates/py links against, rather than letting pyo3 pick one
+      - shell: bash
+        run: echo "PYO3_PYTHON=$(uv python find)" >> "$GITHUB_ENV"
+
+      - run: mise run test
+
+  bundle:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux-x86_64
+          - os: ubuntu-24.04-arm
+            artifact: linux-aarch64
+          - os: macos-latest
+            artifact: macos-aarch64
+          - os: macos-15-intel
+            artifact: macos-x86_64
+          - os: windows-latest
+            artifact: windows-x86_64
+
+    name: Bundle ${{ matrix.artifact }}
+    runs-on: ${{ matrix.os }}
+    needs: [version, test]
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
+
+      - uses: jdx/mise-action@v4.3.0
+
+      - uses: Swatinem/rust-cache@v2.9.2
+
+      - run: uv sync --locked
+
+      # Rewrites the binary's RPATH to point at the bundled interpreter
+      - name: Install patchelf
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y patchelf
+
+      - run: mise run bundle
+
+      # `env -i` proves the archive does not lean on the runner's Python.
+      # `smoke_bundle` sets VIRTUAL_ENV to a venv that would break `import math` if honored.
+      - name: Smoke-test the bundle
+        if: runner.os != 'Windows'
+        run: |
+          env -i "$PWD/dist/bin/$(ls dist/bin | head -n1)"
+          uv run python scripts/smoke_bundle.py
+
+      - name: Smoke-test the bundle (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: uv run python scripts/smoke_bundle.py
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czf ${{ matrix.artifact }}.tar.gz -C dist .
+          sha256sum ${{ matrix.artifact }}.tar.gz > ${{ matrix.artifact }}.tar.gz.sha256
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/* -DestinationPath "${{ matrix.artifact }}.zip"
+          Get-FileHash -Algorithm SHA256 "${{ matrix.artifact }}.zip" |
+            ForEach-Object { "$($_.Hash.ToLower()) $($_.Path | Split-Path -Leaf)" } |
+            Set-Content -NoNewline "${{ matrix.artifact }}.zip.sha256"
+
+      - uses: actions/attest-build-provenance@v4.2.2
+        with:
+          subject-path: ${{ runner.os != 'Windows' && format('{0}.tar.gz', matrix.artifact) || format('{0}.zip', matrix.artifact) }}
+
+      - uses: softprops/action-gh-release@v3.0.3
+        with:
+          files: |
+            ${{ matrix.artifact }}.${{ runner.os != 'Windows' && 'tar.gz' || 'zip' }}
+            ${{ matrix.artifact }}.${{ runner.os != 'Windows' && 'tar.gz' || 'zip' }}.sha256

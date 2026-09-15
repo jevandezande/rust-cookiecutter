@@ -1,0 +1,4 @@
+## 3. Traits and Fakes
+
+- `crates/core` tests drive traits with a pure-Rust fake; that is what the trait is for. Nothing in the workspace needs an interpreter to test.
+- pytest covers `scripts/` (toolchain helpers), not first-party Python modules; there are none.

@@ -1,0 +1,18 @@
+{%- set pkg = cookiecutter.__package_name -%}
+## Python boundary
+
+- `crates/py` is the only crate Python imports; it compiles to `{{pkg}}._core`. Keep it thin:
+  convert, call into `crates/core`, convert back.
+- Leave pyo3's `extension-module` to maturin (`[tool.maturin] features` in `pyproject.toml`).
+  It is not a default feature of `crates/py`, so `cargo test` links libpython and needs no flags.
+- A core error crosses as a Python exception through a conversion function like `score_error`;
+  a `From` impl is barred for two foreign types. Do not raise a bare `PyException`, and never let
+  a panic cross the boundary.
+- Wrap real Rust work in `py.detach` so other Python threads run. Inside a detached block `rayon`
+  pays off.
+- Cross once per batch. A `for` loop in Python around a `#[pyfunction]` pays the crossing every
+  time; for numpy/scipy/torch, take a buffer or array rather than a `PyList` of scalars.
+- Keep `python/{{pkg}}/_core.pyi` in step with the `#[pymodule]` surface. `tests/test_stubs.py`
+  checks the names; the signatures are on you.
+- Export through `python/{{pkg}}/__init__.py`. Callers import the package, not `._core`.
+- First-party Python belongs in `python/{{pkg}}/` and `tests/`; `scripts/` is toolchain helpers.

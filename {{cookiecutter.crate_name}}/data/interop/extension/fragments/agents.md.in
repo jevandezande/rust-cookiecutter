@@ -1,0 +1,46 @@
+{%- set pkg = cookiecutter.__package_name -%}
+## Calling Rust from Python
+
+This workspace is a Python extension module: `crates/py` compiles to a `cdylib` named `_core`,
+which `python/{{pkg}}/` imports and a wheel ships.
+
+```sh
+mise run develop   # build the module into .venv, in place
+mise run wheel     # release wheel into dist/
+```
+
+The files that carry the interop:
+
+- `crates/py/` - the `#[pymodule]`; an abi3 `cdylib` named `_core`, not published to crates.io
+- `python/{{pkg}}/` - `__init__.py` re-exporting the public API, `_core.pyi` typing the compiled
+  module, and `py.typed`
+- `tests/` - pytest over the boundary, separate from `crates/py`'s own `#[test]`s
+- `scripts/` - toolchain helpers (MSRV check, toolchain bump); not interop, but pytest covers
+  it alongside `tests/`
+- `pyproject.toml` - a maturin `[build-system]`, so this is a Python distribution. `package = true`,
+  and the version is `dynamic`, read from `Cargo.toml`
+
+Rules that matter when editing it:
+
+- `crates/core` must stay free of pyo3. Anything Python needs from it is a trait, implemented in
+  `crates/py`. Put logic in `core`, not in the interop layer.
+- pyo3's `extension-module` is enabled by maturin alone, through `[tool.maturin] features` in
+  `pyproject.toml`. Never make it a default feature of `crates/py`: it omits the libpython symbols
+  the host interpreter supplies at import, so every test binary would need
+  `--no-default-features`, which cargo applies to every crate in the workspace.
+- Return core errors as `PyErr` through a conversion function, as `score_error` maps
+  `NegativeInput` to `ScoreError`; a `From` impl is barred, since both types are foreign to
+  `crates/py`. A panic crossing the boundary aborts the interpreter.
+- Hand the GIL back with `py.detach` around real Rust work, so other Python threads run and
+  `rayon` inside the detached block pays off. Still cross once per batch rather than once per
+  element.
+- Keep `_core.pyi` in step with the `#[pymodule]` surface. `tests/test_stubs.py` checks the names
+  agree; the signatures are unchecked.
+- Callers import `{{pkg}}`, never `{{pkg}}._core`. The `__init__.py` re-export is what lets the
+  Rust side move.
+- `mise run py-test` depends on `develop`, because pytest cannot import a module that has not been
+  built. After changing Rust, rebuild before testing from Python.
+{%- if cookiecutter.crate_type != 'lib' %}
+- `crates/cli` is pure Rust over the same core, with no pyo3 and no `python` feature. It is a
+  separate consumer of `crates/core`, not a consumer of the extension module.
+{%- endif %}

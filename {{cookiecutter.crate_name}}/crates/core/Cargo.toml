@@ -1,0 +1,27 @@
+{%- set crate = cookiecutter.crate_name -%}
+[package]
+name = "{{crate}}"
+description = "{{cookiecutter.description or cookiecutter.project_name}}"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+readme.workspace = true
+keywords.workspace = true
+{%- if cookiecutter.license != 'None' %}
+license.workspace = true
+{%- endif %}
+repository.workspace = true
+
+[lib]
+bench = false
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "best_score"
+harness = false
+
+[lints]
+workspace = true

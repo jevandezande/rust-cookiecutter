@@ -1,0 +1,23 @@
+[global]
+
+disable = [
+    "MD013",  # line length
+    "MD033",  # no inline HTML
+    "MD075",  # pipe rows without table header (false positives from LaTeX math with |)
+]
+
+exclude = [
+    ".git",
+    ".venv",
+    "node_modules",
+    "vendor",
+    "dist",
+    "build",
+    "target",
+]
+
+respect-gitignore = true
+
+[per-file-ignores]
+"**/skills/**/*.md" = ["MD041"]
+"CLAUDE.md" = ["MD041"]

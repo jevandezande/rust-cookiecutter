@@ -1,0 +1,100 @@
+name: Test
+
+on:
+  pull_request: {}
+  push:
+    branches: [master]
+
+concurrency:
+  group: {% raw %}${{ github.workflow }}-${{ github.ref }}{% endraw %}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    name: Test {% raw %}${{ matrix.os }}{% endraw %}
+    runs-on: {% raw %}${{ matrix.os }}{% endraw %}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
+
+      - uses: jdx/mise-action@v4.3.0
+
+      - uses: Swatinem/rust-cache@v2.9.2
+
+      - run: uv sync --locked
+{%- if cookiecutter.python_interop == 'embedded' %}
+
+      # pyo3 otherwise picks an interpreter itself, which need not be the one uv just synced
+      - name: Pin the build interpreter
+        shell: bash
+        run: echo "PYO3_PYTHON=$(uv python find)" >> "$GITHUB_ENV"
+
+      # Windows has no rpath, so a test executable that links libpython needs `python3*.dll` on
+      # PATH. build.rs stages it beside cargo's binaries, but rustdoc runs doctests from a
+      # temporary directory it does not stage
+      - name: Put libpython on PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: uv run python -c "import sys; print(sys.base_prefix)" >> "$GITHUB_PATH"
+{%- endif %}
+
+      # Whitespace, TOML/YAML, and merge markers; `mise run all` covers the rest
+      - name: Hooks
+        shell: bash
+        run: |
+          uv run -- prek run --all-files --show-diff-on-failure --color=always \
+            check-toml \
+            check-yaml \
+            check-merge-conflict \
+            trailing-whitespace \
+            end-of-file-fixer
+{%- if cookiecutter.python_interop == 'extension' %}
+
+      # The module is already built by `uv sync` above, and `py-test` depends on `develop`; a
+      # separate step keeps a build failure out of the middle of `mise run all`
+      - name: Build the extension module
+        run: mise run develop
+{%- endif %}
+
+      - run: mise run all
+
+  msrv:
+    name: MSRV
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: jdx/mise-action@v4.3.0
+      - uses: Swatinem/rust-cache@v2.9.2
+
+      # The script needs only the venv's interpreter, not the project built into it
+      - run: uv sync --locked --no-install-project
+{%- if cookiecutter.python_interop == 'embedded' %}
+
+      - shell: bash
+        run: echo "PYO3_PYTHON=$(uv python find)" >> "$GITHUB_ENV"
+{%- endif %}
+
+      - run: mise run msrv
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: jdx/mise-action@v4.3.0
+
+      # cargo-deny comes from mise.toml, so CI and `mise run deny` use the same version
+      - run: mise run deny

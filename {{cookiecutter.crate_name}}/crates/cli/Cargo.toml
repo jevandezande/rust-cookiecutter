@@ -1,0 +1,29 @@
+{%- set crate = cookiecutter.crate_name -%}
+[package]
+name = "{{crate}}-cli"
+description = "Command-line interface for {{cookiecutter.project_name}}"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+readme.workspace = true
+keywords.workspace = true
+{%- if cookiecutter.license != 'None' %}
+license.workspace = true
+{%- endif %}
+repository.workspace = true
+
+[[bin]]
+name = "{{crate}}"
+path = "src/main.rs"
+doc = false
+bench = false
+
+[dependencies]
+{{crate}} = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[lints]
+workspace = true

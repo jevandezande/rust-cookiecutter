@@ -1,0 +1,37 @@
+# Rust
+/target/
+
+# Release bundles
+/dist/
+
+# Python (uv-managed environment and tool caches)
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Compiled extension module (maturin)
+*.so
+*.pyd
+
+# rumdl
+.rumdl_cache/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+mise.local.toml
+
+# Agents
+.claude/settings.local.json

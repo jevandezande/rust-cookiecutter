@@ -1,0 +1,22 @@
+## No Python interop
+
+This workspace is pure Rust: no pyo3, no embedded interpreter, no wheel, no `.pyi` stub. Nothing
+links libpython, and no Rust code imports a Python package.
+
+The Python that is here is tooling, not interop:
+
+- `scripts/` - toolchain helpers (MSRV check, toolchain bump), covered by pytest
+- `pyproject.toml` - the `dev` group plus ruff/ty/pytest configuration. It has no
+  `[build-system]`: this is not a Python distribution, so uv installs those packages without
+  trying to build the project.
+
+Rules that matter when editing it:
+
+- Logic lives in `crates/core`, written against traits. A trait with a pure-Rust implementation
+  keeps the core testable; put logic there, not in the layers around it.
+- Do not add pyo3 here. No crate links libpython, and nothing in the workspace is built to host
+  an interpreter.
+- Do not add first-party `.py` files. Python in this repo means the helpers in `scripts/`.
+{%- if cookiecutter.crate_type != 'lib' %}
+- `crates/cli` stays a thin binary (`clap`, `tracing`). Logic does not live there.
+{%- endif %}

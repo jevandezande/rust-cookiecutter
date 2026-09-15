@@ -1,0 +1,37 @@
+{%- set crate = cookiecutter.crate_name -%}
+[package]
+name = "{{crate}}-cli"
+description = "Command-line interface for {{cookiecutter.project_name}}"
+build = "build.rs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+readme.workspace = true
+keywords.workspace = true
+{%- if cookiecutter.license != 'None' %}
+license.workspace = true
+{%- endif %}
+repository.workspace = true
+
+[[bin]]
+name = "{{crate}}"
+path = "src/main.rs"
+doc = false
+bench = false
+
+[features]
+default = ["python"]
+# thiserror only wraps the two error types the interpreter path produces
+python = ["dep:{{crate}}-python", "dep:thiserror"]
+
+[dependencies]
+{{crate}} = { workspace = true }
+{{crate}}-python = { workspace = true, optional = true }
+clap = { workspace = true }
+thiserror = { workspace = true, optional = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[lints]
+workspace = true

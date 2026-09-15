@@ -1,0 +1,58 @@
+{%- set pkg = cookiecutter.__package_name -%}
+## Calling Rust from Python
+
+`crates/py` compiles to `{{pkg}}._core`, a [pyo3](https://pyo3.rs) extension module. Python owns
+the process and imports Rust into it.
+
+The pieces:
+
+- `crates/py` - the `cdylib` named `_core`. Built against pyo3's `abi3-py313`, so one wheel per
+  platform covers every Python from 3.13 up.
+- `python/{{pkg}}/` - the package callers import. `__init__.py` re-exports from `._core`, so the
+  Rust side can be reorganized without breaking them. `_core.pyi` types the compiled module,
+  which carries no types of its own; `tests/test_stubs.py` checks its names against the module.
+- `tests/` - pytest over the boundary: conversion, exceptions, and threading.
+
+Logic lives in `crates/core`, including the `Scorer` implementation. `crates/py` converts, calls
+in, and converts back. That split keeps the core compiling and testing with no Python present.
+The trait is a plain Rust abstraction. The contract with Python is the `#[pymodule]` surface.
+
+### Building it
+
+```sh
+mise run develop   # build into .venv, in place
+mise run wheel     # release wheel into dist/
+```
+
+`mise run develop` is `maturin develop`. `mise run py-test` depends on it, because pytest cannot
+import a module that has not been built.
+
+### `extension-module` belongs to maturin
+
+pyo3's `extension-module` feature omits the libpython symbols and leaves the host interpreter to
+supply them at import time. That is correct for a wheel and a link error for every test binary in
+the workspace, so `crates/py` neither enables it nor makes it a default feature. maturin turns it
+on when it builds, from `features` under `[tool.maturin]` in `pyproject.toml`, and plain
+`cargo build` and `cargo test` link libpython as any other crate would. Keep it that way. As a
+default feature it would need `--no-default-features` on every task, which cargo applies to every
+crate in the workspace and silently switches off any default feature a crate later grows.
+
+### Errors and the GIL
+
+A core error crosses as a Python exception through `score_error`, which maps `NegativeInput` to
+the module's exported `ScoreError`. Give a new error type the same treatment rather than raising a
+bare `PyException`; a `From` impl is barred, since both types are foreign to `crates/py`.
+
+`best_score` wraps its Rust work in `py.detach`, handing the interpreter back so other Python
+threads run meanwhile. Do that for anything not trivially fast. It is also what makes `rayon`
+inside the extension pay off. Cross the boundary once per batch either way: a `for` loop in Python
+around a `#[pyfunction]` pays the crossing every time.
+
+```python
+from {{pkg}} import best_score
+
+best_score([1.0, 16.0, 4.0])  # 4.0
+```
+{% if cookiecutter.crate_type != 'lib' %}
+`crates/cli` is a pure-Rust binary over the same core. It does not link the extension module.
+{% endif %}

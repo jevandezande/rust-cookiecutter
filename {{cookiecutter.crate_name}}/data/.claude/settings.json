@@ -1,0 +1,17 @@
+{
+  "includeCoAuthoredBy": false,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mise run fmt && mise run py-fmt",
+            "statusMessage": "Formatting with cargo fmt and ruff"
+          }
+        ]
+      }
+    ]
+  }
+}

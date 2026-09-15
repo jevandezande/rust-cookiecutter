@@ -1,0 +1,8 @@
+## 3. The Python Boundary
+
+- The boundary is tested from both sides: `crates/core` keeps `#[test]`s for the Rust half, `tests/` covers what a caller of the wheel sees.
+- `crates/core` tests must not touch pyo3. Drive traits with a pure-Rust fake.
+- `cargo test` needs no flags: `extension-module` is maturin's to enable, not a default feature. Do not make it one, or every test binary in the workspace stops linking.
+- pytest covers `tests/` (the boundary) and `scripts/` (toolchain helpers). `mise run py-test` builds the module first, because pytest cannot import what has not been built.
+- Cover the crossing rather than the logic behind it: type conversion, a Rust error arriving as `ScoreError`, and several threads calling the module at once.
+- `tests/test_stubs.py` compares the names in `_core.pyi` with the compiled module. Extend it if the stub grows beyond names.
