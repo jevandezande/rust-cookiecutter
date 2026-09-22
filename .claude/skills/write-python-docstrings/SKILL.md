@@ -46,7 +46,7 @@ def process_spam(input_data: list[tuple[str, int]], threshold: int = 2) -> dict[
 
     Args:
         input_data (list[str]): A list of spam counts to process.  # ❌ Has type, article, and unnecessary trailing period
-        threshold (int): Minimum count threshold for inclusion.    # ❌ Has type, article, and sentence-case description
+        threshold (int): Minimum count threshold for inclusion     # ❌ Has type, article, and sentence-case description
 
     Returns:
         dict[str, int]: A dictionary mapping categories.           # ❌ Has type, article, and unnecessary trailing period
