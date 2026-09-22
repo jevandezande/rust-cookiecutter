@@ -10,9 +10,9 @@
 [![Edition: 2024](https://img.shields.io/badge/edition-2024-000000?logo=rust)](https://doc.rust-lang.org/edition-guide/)
 [![Code style: rustfmt](https://img.shields.io/badge/code%20style-rustfmt-000000.svg)](https://github.com/rust-lang/rustfmt)
 [![Linting: clippy](https://img.shields.io/badge/linting-clippy-000000.svg)](https://github.com/rust-lang/rust-clippy)
-[![Python: uv](https://img.shields.io/badge/python-uv-261230?logo=uv)](https://docs.astral.sh/uv/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://docs.astral.sh/uv/)
 [![Linting: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Type checking: ty](https://img.shields.io/badge/types-ty-261230)](https://docs.astral.sh/ty/)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://docs.astral.sh/ty/)
 [![Markdown style: rumdl](https://img.shields.io/badge/md%20style-rumdl-000000.svg)](https://rumdl.dev)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/{{cookiecutter.github_username}}/{{crate}}/test.yml?branch=master&logo=github-actions)]({{cookiecutter.project_url}}/actions/)
 

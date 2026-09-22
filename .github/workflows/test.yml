@@ -171,7 +171,7 @@ jobs:
         working-directory: ../rust-project
         run: |
           mise run all
-          uv run prek run -a
+          uv run prek run -a --stage pre-push
 
       # The MSRV trails the pinned toolchain by MSRV_LAG minors. Only a leg with dependencies can
       # catch one of them moving its own rust-version past that window, which would break the

@@ -119,7 +119,7 @@ Pick one of three mechanisms:
 
 ## Testing
 
-Hooks: `mise run all`, or `prek run -a` (same plus whitespace and TOML/YAML).
+Hooks: `mise run all`, or `prek run -a --stage pre-push` (same plus whitespace and TOML/YAML).
 
 `test_template_renders_to_well_formed_files` in `hooks/test_post_gen_project.py` renders every
 non-verbatim template file for each option combination and parses the TOML, YAML, JSON, and
@@ -139,7 +139,7 @@ Jinja branches and files. Match the Linux CI legs locally:
 
 Windows and macOS exercise bundling (`both`/MIT/binaries). Windows also runs
 `both`/extension/pypi, where no test executable loads libpython. Every leg runs `mise run all`
-plus `uv run prek run -a`.
+plus `uv run prek run -a --stage pre-push`.
 
 The dependencies leg also runs `mise run msrv` and `mise run deny`. It is the only one with
 external crates, so it is the only one where a dependency raising its own `rust-version` past
