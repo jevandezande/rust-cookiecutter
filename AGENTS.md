@@ -58,6 +58,9 @@ details live in `mise.toml` alone.
   `crates/cli` plus the bundle scripts (`bundle.py`, `smoke_bundle.py`, and their tests). Those
   deletions are no-ops unless `embedded` copied the scripts in. `core` is always present; `py` is
   absent under `python_interop=none`. `members = ["crates/*"]` picks up whichever survive.
+- `license=None` means proprietary, not unlicensed: `set_license` copies
+  `data/licenses/Proprietary`, `Cargo.toml` declares `LicenseRef-Proprietary` (SPDX has no
+  proprietary id) with `publish = false`, and `deny.toml` ignores private crates.
 - `clippy::cargo_common_metadata` is allowed: it demands keywords, categories, and a license,
   which would force placeholder metadata into every project. Pre-gen requires the metadata a
   crates.io release publishes instead.
@@ -126,7 +129,7 @@ root `prek.toml` has to exclude those files from `check-toml`/`check-yaml`.
 Template body: generate a project. `license` and `release_ci` select different
 Jinja branches and files. Match the Linux CI legs locally:
 
-- `lib`/unlicensed
+- `lib`/proprietary
 - `both`/MIT/binaries
 - `both`/Apache-2.0/crates.io with dependencies
 - `both`/none/binaries

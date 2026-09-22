@@ -10,8 +10,9 @@ rust-version.workspace = true
 authors.workspace = true
 readme.workspace = true
 keywords.workspace = true
-{%- if cookiecutter.license != 'None' %}
 license.workspace = true
+{%- if cookiecutter.license == 'None' %}
+publish.workspace = true
 {%- endif %}
 repository.workspace = true
 

@@ -26,6 +26,8 @@ RUST_MSRV_PLACEHOLDER = "{rust_msrv}"
 
 DEFAULT_BRANCH = "master"
 
+PROPRIETARY = "Proprietary"
+
 BUNDLE_SCRIPTS = (
     "scripts/bundle.py",
     "scripts/test_bundle.py",
@@ -217,15 +219,17 @@ def set_rust_version() -> None:
 def set_license(license_name: str) -> None:
     """Copy selected license to LICENSE and fill in year and author.
 
+    "None" means proprietary rather than unlicensed: silence is not a grant, so the project
+    ships an all-rights-reserved notice and `Cargo.toml` marks the crates `publish = false`.
+
     Args:
-        license_name: SPDX license id, or "None" for no license
+        license_name: SPDX license id, or "None" for proprietary
 
     Raises:
         ValueError: no matching license file
     """
     if license_name == "None":
-        logger.debug("No license set")
-        return
+        license_name = PROPRIETARY
 
     licenses = {lic.name for lic in Path("data/licenses").iterdir()}
     if license_name not in licenses:

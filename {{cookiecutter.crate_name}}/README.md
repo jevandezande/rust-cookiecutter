@@ -2,7 +2,7 @@
 {%- set crate = cookiecutter.crate_name -%}
 # {{cookiecutter.project_name}}
 
-{% if cookiecutter.license == "None" %}![License](https://img.shields.io/badge/license-None-black){% else %}[![License](https://img.shields.io/github/license/{{cookiecutter.github_username}}/{{crate}})]({{cookiecutter.project_url}}/blob/master/LICENSE){% endif %}
+{% if cookiecutter.license == "None" %}[![License](https://img.shields.io/badge/license-Proprietary-black)]({{cookiecutter.project_url}}/blob/master/LICENSE){% else %}[![License](https://img.shields.io/github/license/{{cookiecutter.github_username}}/{{crate}})]({{cookiecutter.project_url}}/blob/master/LICENSE){% endif %}
 {% if cookiecutter.release_ci == 'crates.io' %}[![Crates.io](https://img.shields.io/crates/v/{{crate}}?logo=rust)](https://crates.io/crates/{{crate}})
 [![Docs.rs](https://img.shields.io/docsrs/{{crate}}?logo=docsdotrs)](https://docs.rs/{{crate}})
 {% elif cookiecutter.release_ci == 'pypi' %}[![PyPI](https://img.shields.io/pypi/v/{{crate}}?logo=pypi)](https://pypi.org/project/{{crate}}/)

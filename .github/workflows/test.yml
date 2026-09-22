@@ -48,7 +48,7 @@ jobs:
         # Option coverage runs on Linux. Windows proves mise activates .venv; macOS is the
         # bundle relocator that needs install_name_tool and ad-hoc codesign.
         include:
-          - name: lib, unlicensed
+          - name: lib, proprietary
             os: ubuntu-latest
             crate_type: lib
             python_interop: embedded

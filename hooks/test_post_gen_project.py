@@ -312,9 +312,9 @@ def test_every_license_choice_ships_a_file_set_license_can_format() -> None:
     choices = json.loads((ROOT / "cookiecutter.json").read_text(encoding="utf-8"))["license"]
     licenses = TEMPLATE / "data" / "licenses"
 
-    assert {choice for choice in choices if choice != "None"} == {
-        path.name for path in licenses.iterdir()
-    }
+    expected = {choice for choice in choices if choice != "None"} | {post_gen_project.PROPRIETARY}
+
+    assert expected == {path.name for path in licenses.iterdir()}
 
     for path in licenses.iterdir():
         contents = path.read_text(encoding="utf-8")
@@ -336,13 +336,23 @@ def test_set_license_rejects_unknown(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert not (tmp_path / "LICENSE").exists()
 
 
-def test_set_license_none_writes_nothing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Skip license setup when no license is selected."""
+def test_set_license_none_writes_proprietary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Fall back to an all-rights-reserved notice when no license is selected."""
+    licenses_path = tmp_path / "data" / "licenses"
+    licenses_path.mkdir(parents=True)
+    (licenses_path / post_gen_project.PROPRIETARY).write_text(
+        "All rights reserved {year} {author_name}", encoding="utf-8"
+    )
+
     monkeypatch.chdir(tmp_path)
+    fake_datetime = SimpleNamespace(now=lambda: SimpleNamespace(year=2026))
+    monkeypatch.setattr(post_gen_project, "datetime", fake_datetime)
 
     post_gen_project.set_license("None")
 
-    assert not (tmp_path / "LICENSE").exists()
+    assert "All rights reserved" in (tmp_path / "LICENSE").read_text(encoding="utf-8")
 
 
 @pytest.fixture

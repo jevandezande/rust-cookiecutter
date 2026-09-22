@@ -10,7 +10,10 @@ edition = "2024"
 rust-version = "{rust_msrv}"
 authors = ["{{cookiecutter.author_name}}"]
 readme = "README.md"
-{%- if cookiecutter.license != 'None' %}
+{%- if cookiecutter.license == 'None' %}
+license = "LicenseRef-Proprietary"
+publish = false
+{%- else %}
 license = "{{cookiecutter.license}}"
 {%- endif %}
 repository = "{{cookiecutter.project_url}}"

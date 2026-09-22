@@ -98,9 +98,9 @@ The cookiecutter will automagically:
 | `python_dependencies` | Space-separated, `uv add` syntax (e.g. `numpy scipy`). Under `embedded` they land in `[project.dependencies]` for the interpreter to import, though the skeleton still calls `math.sqrt`. Under `extension` they are the wheel's runtime dependencies. Under `none` pre-gen rejects them, since nothing imports them |
 | `description` | One-line crate description; falls back to `project_name` |
 | `keywords` | Space-separated crates.io keywords, max 5 |
-| `license` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, or `None` |
+| `license` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, or `None`. `None` is proprietary, not unlicensed: `LICENSE` is an all-rights-reserved notice, `Cargo.toml` declares `LicenseRef-Proprietary`, and the crates are `publish = false` |
 | `github_setup` | Create the GitHub repo as `private`, `internal`, `public`, or `None`. The repo is `github_username/crate_name`, so `internal` needs `github_username` to be an organization |
-| `release_ci` | `binaries` (tagged GitHub release with checksums and provenance), `crates.io` (Trusted Publishing), `pypi` (maturin wheels and an sdist, Trusted Publishing), or `None`. `binaries` requires `crate_type=both`; `crates.io` requires a license; `pypi` requires `python_interop=extension` |
+| `release_ci` | `binaries` (tagged GitHub release with checksums and provenance), `crates.io` (Trusted Publishing), `pypi` (maturin wheels and an sdist, Trusted Publishing), or `None`. `binaries` requires `crate_type=both`; `crates.io` requires an open-source license; `pypi` requires `python_interop=extension` |
 | `coding_agent` | `Claude`, `Codex`, or `None`. `AGENTS.md` is always written. `Claude` adds a `CLAUDE.md` that only imports it (`@AGENTS.md`), so the rules live in one file |
 
 `author_name` and `github_username` are required; generation fails if either is blank.

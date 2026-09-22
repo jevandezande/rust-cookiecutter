@@ -6,6 +6,8 @@ build-backend = "maturin"
 [project]
 name = "{{cookiecutter.crate_name}}"
 description = "{{cookiecutter.description or cookiecutter.project_name}}"
+license = "{{ 'LicenseRef-Proprietary' if cookiecutter.license == 'None' else cookiecutter.license }}"
+license-files = ["LICENSE"]
 dynamic = ["version"]
 requires-python = ">=3.13"
 dependencies = []

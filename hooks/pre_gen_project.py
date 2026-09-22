@@ -228,7 +228,7 @@ def check_release_compatibility(crate_type: str, release_ci: str, license_name: 
         >>> check_release_compatibility("both", "crates.io", "None")
         Traceback (most recent call last):
         ...
-        ValueError: release_ci='crates.io' requires a license; crates.io rejects crates without one.
+        ValueError: release_ci='crates.io' requires an open-source license; 'None' is proprietary.
     """
     if crate_type == "lib" and release_ci == "binaries":
         raise ValueError(
@@ -236,7 +236,7 @@ def check_release_compatibility(crate_type: str, release_ci: str, license_name: 
         )
     if license_name == "None" and release_ci == "crates.io":
         raise ValueError(
-            "release_ci='crates.io' requires a license; crates.io rejects crates without one."
+            "release_ci='crates.io' requires an open-source license; 'None' is proprietary."
         )
 
 
