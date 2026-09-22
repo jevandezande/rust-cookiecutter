@@ -220,7 +220,6 @@ Key configuration files:
 - `deny.toml` - cargo-deny license allowlist and advisory policy
 - `.rumdl.toml` - markdown linting configuration
 - `.editorconfig` - editor formatting settings
-- `.github/dependabot.yml` - weekly grouped updates for github-actions, cargo, and uv
 
 ## Lints
 
