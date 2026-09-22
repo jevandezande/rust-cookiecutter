@@ -439,8 +439,7 @@ def setup_coding_agent_files(agent: str) -> None:
 
     match coding_agent:
         case CodingAgent.CLAUDE:
-            Path("CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
-            cmd = "claude /init"
+            cmd = "claude -p 'Read AGENTS.md and update it'"
         case CodingAgent.CODEX:
             Path(".claude/settings.json").unlink()
             cmd = "codex exec 'Read AGENTS.md and update it'"

@@ -101,7 +101,7 @@ The cookiecutter will automagically:
 | `license` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, or `None`. `None` is proprietary, not unlicensed: `LICENSE` is an all-rights-reserved notice, `Cargo.toml` declares `LicenseRef-Proprietary`, and the crates are `publish = false` |
 | `github_setup` | Create the GitHub repo as `private`, `internal`, `public`, or `None`. The repo is `github_username/crate_name`, so `internal` needs `github_username` to be an organization |
 | `release_ci` | `binaries` (tagged GitHub release with checksums and provenance), `crates.io` (Trusted Publishing), `pypi` (maturin wheels and an sdist, Trusted Publishing), or `None`. `binaries` requires `crate_type=both`; `crates.io` requires an open-source license; `pypi` requires `python_interop=extension` |
-| `coding_agent` | `Claude`, `Codex`, or `None`. `AGENTS.md` is always written. `Claude` adds a `CLAUDE.md` that only imports it (`@AGENTS.md`), so the rules live in one file |
+| `coding_agent` | `Claude`, `Codex`, or `None`. `AGENTS.md` is always written, and every agent reads it; `Claude` additionally gets `.claude/settings.json`. The skills land in `.claude/skills/` either way |
 
 `author_name` and `github_username` are required; generation fails if either is blank.
 `description` and `keywords` are required when `release_ci=crates.io`.

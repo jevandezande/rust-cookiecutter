@@ -368,28 +368,24 @@ def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.mark.parametrize(
-    ("agent", "claude_md", "settings"),
+    ("agent", "settings"),
     [
-        ("Claude", True, True),
-        ("Codex", False, False),
+        ("Claude", True),
+        ("Codex", False),
     ],
 )
 def test_setup_coding_agent_files_writes_the_agents_own_file(
-    agent_data: Path, agent: str, claude_md: bool, settings: bool
+    agent_data: Path, agent: str, settings: bool
 ) -> None:
-    """Always write AGENTS.md; Claude also gets CLAUDE.md and settings.json.
+    """Always write AGENTS.md, which every agent reads; only Claude gets settings.json.
 
-    `CLAUDE.md` only imports `AGENTS.md`, so rules are not duplicated. Skills go to both agents,
-    as reference, and `STATE.md` with them, since the spec skills read and update it;
-    `settings.json` is Claude's settings and hooks.
+    Skills go to both agents, as reference, and `STATE.md` with them, since the spec skills read
+    and update it; `settings.json` is Claude's settings and hooks.
     """
     post_gen_project.setup_coding_agent_files(agent)
 
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
-    claude_md_path = agent_data / "CLAUDE.md"
-    assert claude_md_path.exists() is claude_md
-    if claude_md:
-        assert claude_md_path.read_text(encoding="utf-8") == "@AGENTS.md\n"
+    assert not (agent_data / "CLAUDE.md").exists()
     assert (agent_data / ".claude" / "skills").is_dir()
     assert (agent_data / ".claude" / "settings.json").exists() is settings
     assert (agent_data / "STATE.md").read_text(encoding="utf-8") == "progress tracker"

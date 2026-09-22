@@ -20,4 +20,3 @@ respect-gitignore = true
 
 [per-file-ignores]
 "**/skills/**/*.md" = ["MD041"]
-"CLAUDE.md" = ["MD041"]
