@@ -24,17 +24,17 @@ const, or macro without a doc comment fails `mise run clippy`.
    "Converts", "Parses". A type or iterator may take a noun phrase instead: "Scorer backed by ..."
 3. Blank `///` line between the summary and anything after it. Only the first paragraph shows in
    the item list, so keep the summary to one line
-4. Sections, in this order: `# Panics`, `# Errors`, `# Safety`, `# Examples`. RFC 1574 also allows
-   `# Aborts` and `# Undefined Behavior`, both vanishingly rare. Invent no others
+4. Add `# Panics`, `# Errors`, and `# Safety` when they describe a real contract. Use
+   `# Examples` on entry points where an example helps a caller. Other headings are fine when
+   they clarify substantial behavior
 5. Blank `///` line between a section heading and its body
-6. No `# Arguments`, `# Parameters`, or `# Returns`. std uses none of them: name parameters in
-   backticks inside the prose instead
+6. Usually explain parameters and return values in prose near the summary. Add a dedicated
+   section only when it makes a complex contract easier to understand
 7. No pseudo-annotations: the signature carries the types, so never restate a parameter's type
    beside its name. When prose does name a generic type, write it in full, `Option<T>` rather than
    `Option`, except in a bound
-8. Section bodies are bare fragments: no leading "a", "an", or "the", no "if"/"when" wrapper, no
-   trailing period
-9. Backtick every identifier, and use an intra-doc link for one that resolves
+8. Describe conditions in clear, complete language. A short fragment is fine when it reads well
+9. Backtick code identifiers; link important public items when a link helps navigation
 
 ## Example
 
@@ -44,13 +44,9 @@ const, or macro without a doc comment fails `mise run clippy`.
 /// Repeated categories merge, so ordering of `input` does not matter. Scores through
 /// [`NativeScorer`], so a caller wanting different weighting supplies its own [`Scorer`].
 ///
-/// # Panics
-///
-/// `input` longer than `isize::MAX`
-///
 /// # Errors
 ///
-/// negative `threshold`
+/// Returns [`NegativeThreshold`] if `threshold` is negative.
 ///
 /// # Examples
 ///
@@ -72,16 +68,16 @@ pub fn process_spam(
 ```rust
 /// process spam counts                              // ❌ fragment, lowercase, no period
 ///
-/// # Arguments                                      // ❌ std has no Arguments section
-/// * `input` - A list of spam counts to process.    // ❌ article and trailing period
+/// # Arguments                                      // ❌ adds a section for simple inputs
+/// * `input` - A list of spam counts to process.    // ❌ repeats an obvious input
 /// * `threshold` (i64) - The minimum count.         // ❌ type already in the signature
 ///
-/// # Returns                                        // ❌ std has no Returns section
-/// A HashMap mapping categories to counts.          // ❌ article, unbackticked type, period
+/// # Returns                                        // ❌ repeats a simple return type
+/// A HashMap mapping categories to counts.          // ❌ unlinked type, repeats signature
 ///
 /// # Errors
-/// Returns an error if the threshold is negative.   // ❌ no blank line after the heading, and
-///                                                  //    a conditional wrapper, article, period
+/// Returns an error if the threshold is negative.   // ❌ no blank line after the heading;
+///                                                  //    name the error for the caller
 ///
 /// # Example                                        // ❌ section is Examples, even for one
 ///
@@ -91,10 +87,9 @@ pub fn process_spam(
 ## Sections
 
 - `# Panics` — `clippy::missing_panics_doc` is `warn`, so any public function that can panic needs
-  one. Name the condition, not the panic: "empty `xs`", not "Panics when xs is empty."
+  one. Explain the condition that can panic.
 - `# Errors` — `clippy::missing_errors_doc` is `warn`, so every public `fn` returning `Result`
-  needs one. Name the failure, and for a wrapper name what it propagates: "first error the scorer
-  returns".
+  needs one. Name the failures and what a wrapper propagates.
 - `# Safety` — only on `unsafe fn`. `unsafe_code` is `deny` or `forbid` at the workspace, so this
   is rare; when it applies, state the invariant the caller must uphold. Do not add the section to
   a safe function, and keep it distinct from the `// SAFETY:` comment on an `unsafe` block, which
@@ -119,11 +114,9 @@ pub fn process_spam(
 - Link items by path: [`Scorer`], [`Scorer::score_all`], [`crate::best_score`].
 - `rustdoc::broken_intra_doc_links` is `deny`, so `mise run docs` fails on a path that does not
   resolve. Run it after renaming or moving a public item.
-- Link an item on its first mention in a doc block, not on every mention.
-- Wrap a bare URL in `<>`. Give an external link text in reference style — `[WHATWG spec]` in
-  the prose, `[WHATWG spec]: https://url.spec.whatwg.org/` at the end of the doc block —
-  rather than inline `[text](url)`, which buries the URL mid-sentence. std prefers reference
-  style better than 5 to 1.
+- Link an item on its first useful mention in a doc block, not on every mention.
+- Wrap a bare URL in `<>`. Use inline or reference-style links for external sources, whichever
+  keeps the comment easier to read.
 
 ## Module and crate docs
 
@@ -142,7 +135,7 @@ Python-facing signature the way a Python caller reads it.
 
 ## Miscellaneous
 
-- Address "the caller", never "you".
+- Write from the caller's point of view.
 - Line comments only. `//` and `///`, never `/* */`.
 - Do not restate the signature: "Takes an `f64` and returns an `f64`" says nothing the reader
   cannot see.

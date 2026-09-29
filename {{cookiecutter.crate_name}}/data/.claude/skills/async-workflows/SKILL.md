@@ -1,51 +1,22 @@
 ---
 name: async-workflows
-description: Runs long commands (compiles, tests, profiling) in the background so agent turns do not time out.
+description: Run and monitor long builds, tests, benchmarks, or profiles without losing their results.
 argument-hint: None
 allowed-tools:
   - Read
   - Bash
-  - Task
 ---
 
-# Async Workflows for Long-Running Tasks
+# Long-Running Commands
 
-Workspace builds, `mise run bench`, and full test suites can run long enough to time out an agent
-turn. Run any command expected to take more than 30 seconds in the background.
+Use the command environment's asynchronous session or background facility when a build, test,
+benchmark, or profile will outlast the current tool call. Short commands can run in the
+foreground. Choose based on the actual tool timeout and likely command duration.
 
-## 1. Launching Background Tasks
+Keep the process handle, complete output, and exit status. Poll at useful intervals and report
+the final result, including failures. Put temporary logs outside the source tree when possible
+and remove them when done. If a tool already supports yielding and resuming a process, use that
+instead of hand-written `nohup` and PID files.
 
-Start a slow test, compile, or profile with `nohup` and save its PID:
-
-```bash
-nohup mise run bench > bench_output.log 2>&1 &
-echo $! > current_task.pid
-```
-
-## 2. Polling and Multitasking
-
-Do not sit and wait. While the process runs, spawn sub-agents with the `Task` tool for parallel
-work:
-
-- Launch an `explore` sub-agent to audit the codebase for `unsafe` blocks.
-- Launch a `general` sub-agent to draft or review nearby documentation.
-
-To check on the task, read the tail of the log and see whether the process is still alive:
-
-```bash
-tail -n 20 bench_output.log
-ps -p $(cat current_task.pid) || echo "Process finished"
-```
-
-## 3. Profiling
-
-Never read a raw binary profile. Generate text output.
-
-`samply` is optional and not among the pinned tools. If you add it, script it (or `perf`) to
-emit a flamegraph or text summary you can read.
-
-## Summary Rule
-
-Never run `cargo build --release`, `mise run bench`, or a full `cargo test --workspace` in the
-foreground if it may exceed 30 seconds. Background it, log the output, and work in parallel with
-the `Task` tool.
+Do independent work while a command runs when it advances the same task. Parallel agents are
+optional and should be used only when the task or project instructions call for them.

@@ -6,7 +6,8 @@
 - `Scorer::score_all` must cross into Python once with the whole batch. Do not attach once and
   still call Python per element. For numpy/scipy/torch, pass a buffer or array, not a `PyList`
   of scalars.
-- Do not `rayon` over a `PyScorer`. The GIL makes that slower than a loop.
+- Avoid `rayon` over a `PyScorer` unless a representative benchmark shows a gain; Python work
+  that holds the GIL limits parallel execution.
 - `bootstrap()` must run before the first `Python::attach`. Do not remove it. A `dist/bin` +
   `dist/python` layout must not honor `$VIRTUAL_ENV`.
 - The workspace's only `unsafe` is `bootstrap` setting environment variables.

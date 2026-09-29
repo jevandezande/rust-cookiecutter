@@ -1,6 +1,6 @@
 ---
 name: plan-method-docs
-description: Conducts an exhaustive literature review, analyzes algorithmic tradeoffs, identifies key optimizations with citations, and generates a comprehensive Markdown research brief for complex scientific or mathematical methods.
+description: Research a scientific or numerical method when existing sources do not establish its requirements or algorithmic tradeoffs.
 argument-hint: <method-or-topic-name>
 allowed-tools:
   - Read
@@ -15,19 +15,18 @@ allowed-tools:
 
 # Research and Plan Scientific Method Documentation
 
-Use this skill to research a scientific, mathematical, or numerical method and write a research
-brief before the method documentation. The brief grounds the implementation in the most robust
-and efficient algorithms available.
+Use this skill when a scientific or numerical method needs research beyond the project's existing
+source material. Match the depth of review to the unanswered decisions. A port with clear
+behavior and tests need not begin with a literature review.
 
 ## Workflow
 
 ### Phase 1: Literature Review
 
-1. Use `WebFetch` to find and read textbooks, peer-reviewed papers, arXiv preprints, and recent
-   algorithmic reviews on the topic (`$ARGUMENTS`).
-2. Read the methodology sections, not just the abstracts, to understand the math and the
-   complexity. Where approaches compete, research all of them.
-3. If the literature is large, use the `Task` tool to read papers in parallel.
+1. Use `WebFetch` to find primary sources and reliable reviews on the topic (`$ARGUMENTS`).
+2. Read enough of the methods to answer the project's mathematical, numerical, and algorithmic
+   questions. Compare variants that could change the implementation choice.
+3. For a large review, split independent sources only when parallel work is useful and authorized.
 4. Reading PDFs:
    - The `Read` tool reads local PDFs. Download papers to `docs/papers/` and read them there.
    - To extract text with the LaTeX equations intact, run
@@ -129,5 +128,6 @@ constraints.*
 
 ### Phase 7: Final Check
 
-Confirm that `docs/methods/research/<topic>-research.md` was written. Tell the user the brief is
-ready for review before moving on to `write-method-docs`.
+Confirm that `docs/methods/research/<topic>-research.md` was written. State which decisions it
+supports and which questions remain open. Continue to method documentation when the task calls
+for it and the evidence is sufficient.

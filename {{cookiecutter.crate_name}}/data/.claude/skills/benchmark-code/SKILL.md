@@ -13,7 +13,8 @@ allowed-tools:
 # Benchmarking Guidelines
 
 When measuring performance or verifying optimizations, use the criterion benches already in this
-workspace. Run them with `mise run bench`; results land in `target/criterion`.
+workspace. Run them with `mise run bench`; results land in `target/criterion`. Pick inputs that
+represent actual workloads and record the baseline before changing code.
 
 ## 1. The Benchmarking Framework
 
@@ -25,7 +26,8 @@ introduce a second harness.
 - Use `criterion_group!` / `criterion_main!` as the existing files do.
 - Use `std::hint::black_box` on inputs and outputs so LLVM cannot delete the work.
 
-Do not time microbenchmarks with `std::time::Instant`.
+Use criterion for repeatable microbenchmarks. End-to-end timing may use other suitable tools when
+it better captures startup, I/O, or boundary costs.
 
 ## 2. Parameter Sweeps
 
@@ -52,8 +54,9 @@ fn scale(c: &mut Criterion) {
 
 ## 3. Baselines
 
-Keep a simple reference implementation when you optimize, and benchmark the optimized path
-against it so the gain is visible.
+Compare the new path against the previous behavior and against the performance target. Keep a
+simple reference implementation when it helps validate results or explain a complex optimization.
+Report measurement variance and any meaningful memory or correctness tradeoff.
 
 ---
 

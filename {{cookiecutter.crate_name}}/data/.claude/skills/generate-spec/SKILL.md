@@ -1,7 +1,7 @@
 ---
 name: generate-spec
-description: Translates a method document into a concrete Rust software specification.
-argument-hint: <math-doc-path>
+description: Write a Rust implementation spec when behavior, constraints, and acceptance cases need a durable agreement.
+argument-hint: <method-doc-or-feature>
 allowed-tools:
   - Read
   - Glob
@@ -11,63 +11,36 @@ allowed-tools:
   - Bash
 ---
 
-# Generate Specification from Theory
+# Generate a Specification
 
-Use this skill to convert a method document (`docs/methods/*.md`, once one exists) into an
-engineering blueprint (`specs/*.md`).
+Use this skill when a substantial feature or numerical method benefits from a durable spec.
+Small changes and straightforward ports can use `write-code` or `port-code` directly. A method
+document is useful for scientific work but is not a prerequisite for every module.
 
-## Phase 1: Understand
+## Gather evidence
 
-1. Read the method document at `$ARGUMENTS`.
-2. Work out the equations, the complexity, and whether the algorithm is compute-bound or
-   memory-bound.
+Read the method document at `$ARGUMENTS` if one exists. For a new feature, gather intended user
+workflows, callers, project constraints, and acceptance examples; identify choices that still
+need a decision. For a rewrite, inspect the original program's observable behavior, its callers,
+and existing tests. Record unclear behavior rather than guessing. Research a method with
+`plan-method-docs` when the available evidence cannot establish its requirements.
 
-## Phase 2: Design
+## Design the contract
 
-Design the Rust implementation details:
+{interop_rules}
 
-- {interop_rules}
-- Memory layout: choose types that match how the data is walked. Call out ownership and borrowing.
-- Function signatures: draft the core Rust traits, structs, and function signatures.
+- Define inputs, outputs, error behavior, and invariants. Include numerical tolerances, ordering,
+  concurrency, and performance targets where they matter.
+- State which public interfaces or file formats must remain compatible.
+- Give representative acceptance cases, edge cases, and a way to compare a rewrite with its
+  source. Prefer externally visible behavior over private implementation details.
+- Discuss ownership, data layout, and crate boundaries as design options. Specify an exact
+  struct or algorithm only when compatibility or a measured constraint requires it.
 
-## Phase 3: Write Spec
+Write `specs/<module-name>.md` with the objective, behavioral contract, acceptance cases,
+constraints, and design decisions. Link relevant method docs or source references. Add an
+implementation outline only if it helps sequence substantial work; allow the implementer to
+revise it as evidence emerges.
 
-Write the specification file to `specs/<module-name>.md`.
-The spec must contain these sections:
-
-```markdown
-# Spec: <Module Name>
-
-## Objective
-
-What this module implements, in a sentence or two.
-
-## Mathematical Mapping
-
-How the documented steps map to variables and functions in code. Link back to the method doc.
-
-## Data Structures & Memory Layout
-
-Define the exact Rust structs, their fields, and ownership.
-
-## Implementation Steps
-
-An ordered list of small slices that build this module. Each slice must be testable on its own.
-
-1. Define core structs.
-2. Implement a straightforward reference version.
-3. Add tests for the documented cases.
-4. Optimize only after the tests pass.
-```
-
-## Phase 4: Update State
-
-In `STATE.md` at the root, tick the "Spec Generated" box for this module and set Next Action to
-implementing the spec.
-
-Run `mise run md-fmt` and fix anything it reports.
-
----
-
-If the method document at `$ARGUMENTS` is missing or incomplete, research the topic with
-`plan-method-docs`, write it with `write-method-docs`, then return here.
+If `STATE.md` tracks this module, mark the spec complete and name the next action. Run
+`mise run md-fmt` after writing the spec.

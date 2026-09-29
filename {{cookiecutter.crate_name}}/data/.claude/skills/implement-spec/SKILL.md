@@ -1,6 +1,6 @@
 ---
 name: implement-spec
-description: Plans and implements Rust code from a specification file using a strict iterative workflow with git checkpoints.
+description: Implement an existing Rust specification, checking behavior and adapting design as evidence emerges.
 argument-hint: <spec-file>
 allowed-tools:
   - Read
@@ -9,81 +9,43 @@ allowed-tools:
   - Edit
   - Write
   - Bash
-  - Task
 ---
 
-Implement code from the specification file: $ARGUMENTS
+# Implement a Specification
 
-Follow this workflow exactly. Do not skip phases.
+Use this skill when the task is to implement an existing spec. Use `port-code` instead when
+rewriting an existing program in Rust and no spec is required.
 
----
+## Understand the contract
 
-## Phase 1: Understand
+1. Read the spec at `$ARGUMENTS`, related method docs when relevant, and the code it affects.
+   Read `STATE.md` if the project uses it for this module.
+2. Separate observable requirements and invariants from suggested structs, signatures, and
+   implementation steps. Preserve the former; revise the latter when Rust or new evidence gives
+   a better design. Check for callers that depend on a specified public API before changing it.
+3. Identify the acceptance cases, error behavior, and any numerical or performance constraints.
+   Resolve contradictions in the source material before relying on them.
 
-1. Read `STATE.md` in the root directory.
-2. Read the spec file at `$ARGUMENTS` in full.
-3. Read any method documentation the spec links. Skip this if no method doc exists yet.
-4. Explore the codebase with `glob` and `grep` to find existing utilities.
+## Implement
 
----
+- For a small change, work directly. For work spanning several sessions or independent pieces,
+  keep one concise plan in the project's existing tracker. Create a new plan file only when it
+  will help someone resume the work.
+- Build coherent slices that exercise useful behavior. Write tests for acceptance cases,
+  boundaries, and regressions; do not add tests that merely repeat the implementation.
+- Follow `write-code` for Rust conventions, `test-code` for test choices, and
+  `write-doc-comments` for public API documentation.
+- Run focused checks while working. Use `mise run all` when the implementation is ready for the
+  full local gate. Run additional checks, such as `mise run msrv` or a benchmark, when the change
+  affects those concerns. Use `async-workflows` for commands that need background execution.
+- When a design changes, update the spec or record the reason for the deviation. If behavior
+  changes, update the acceptance cases and any affected method documentation.
 
-## Phase 2: Plan & Track
+## Finish
 
-Write `PLAN.md` and `TODO.md` in the root (or target crate) directory.
+Review the diff for API clarity, ownership, error handling, unsafe code, and accidental changes.
+Use `cleanup-code` for the final polish. Update `STATE.md` if this module is tracked there, and
+report what passed and what remains uncertain.
 
-`PLAN.md` must contain:
-
-- Goal: brief summary.
-- Spec Reference: path to the spec.
-- Dependencies: any new crates. Do not add without user approval.
-- Implementation Steps: break the spec's steps into smaller, isolated, testable slices.
-
-`TODO.md` must be a flat checklist, one item per Implementation Step.
-
-`TODO.md` and `TodoWrite` serve different purposes. Use both:
-
-- `TODO.md` persists across sessions. Update it whenever you complete a step.
-- `TodoWrite` shows the user live progress. Mirror the `TODO.md` items into it at the start of
-  Phase 4, and update both as you go.
-
----
-
-## Phase 3: Permissions
-
-Summarize the planned actions: files to create or modify, shell commands, new dependencies.
-Ask: "Do you approve these actions? Any changes before I begin?"
-Wait for explicit approval.
-
----
-
-## Phase 4: Execute & Checkpoint
-
-Work through the `TODO.md` items one slice at a time.
-For each item:
-
-1. Write the code and unit tests. Public items get `///` rustdoc. If a method doc exists,
-   reference the matching steps or equations.
-2. Run the checks:
-   - `cargo fmt --all`
-   - `cargo clippy --workspace --all-targets -- -D warnings`
-   - `cargo test` (or specific test path)
-3. If tests fail, fix them before moving on. If a borrow-checker or link error has you stuck,
-   `git reset --hard HEAD` and `git clean -fd` return you to the last checkpoint to try another
-   approach.
-4. If tests pass, commit immediately to save the checkpoint.
-   - `git add .`
-   - `git commit -m "Implement [slice name] for [module]"`
-5. Mark the item `[x]` in `TODO.md`.
-
-For slow tests or compiles, run them in the background with the `async-workflows` skill.
-
----
-
-## Phase 5: Cleanup & State Update
-
-1. Invoke the `cleanup-code` skill.
-2. In `STATE.md`, check off "Code Implemented" and "Tests Passing" for this module, then update
-   Current Focus and Next Action.
-3. Delete `PLAN.md` and `TODO.md`.
-4. Optionally, run `compare-code-to-spec` to verify the implementation satisfies the spec.
-5. Tell the user the module is complete.
+Do not discard uncommitted work with `git reset --hard` or `git clean`. Do not stage or commit as a
+checkpoint; follow the project's Git instructions and the user's request for commits.

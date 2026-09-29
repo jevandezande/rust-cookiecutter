@@ -29,7 +29,7 @@ Generation already created `.venv` with `uv sync`, built the workspace, installe
 and ran them over the tree, so the environment needs no verification.
 
 1. {AGENT: You will update this file. Follow the directives; do not simplify or delete, only improve}
-2. {AGENT: Read README.md and confirm the project purpose with the user}
+2. {AGENT: Read README.md and establish the project purpose; ask the user only if it remains unclear}
 3. {AGENT: Read Cargo.toml, pyproject.toml, and mise.toml, and update the repository-specific information below}
 4. {AGENT: After setup, tell the user about any discrepancies found}
 5. {AGENT: Delete this checklist and the "Understanding {AGENT: ...} directives" section}
@@ -43,7 +43,8 @@ do not change code without consulting it.
 
 | Skill | Use when |
 | --- | --- |
-| `write-code` | Writing idiomatic, high-performance Rust |
+| `write-code` | Writing idiomatic Rust and reviewing API and ownership choices |
+| `port-code` | Rewriting existing code in Rust while checking behavioral parity |
 | `write-doc-comments` | Writing or reviewing rustdoc doc comments |
 | `test-code` | Writing tests |
 | `debug-code` | Diagnosing a failure |
@@ -55,27 +56,28 @@ do not change code without consulting it.
 | `write-latex` | Mathematical notation in markdown |
 | `plan-method-docs` | Literature review for a new method |
 | `write-method-docs` | Writing the mathematical methodology document |
-| `generate-spec` | Turning a method doc into a software specification |
+| `generate-spec` | Specifying substantial feature or method behavior |
 | `implement-spec` | Implementing a specification |
 | `compare-code-to-spec` | Auditing an implementation against its spec |
 
-### Development pipeline
+### Development workflows
 
-For non-trivial numerical work, each module follows: Math Doc → Spec → Tests → Code. The skills
-above handle each phase in order. {AGENT: if this project is not mathematical or numerical, note
-that this pipeline does not apply and the spec and method-doc skills are unused}
+Use `write-code` and `test-code` for ordinary Rust changes. Use `port-code` when rewriting an
+existing program or module; compare its observable behavior with the original. For complex
+scientific methods, method documentation and a spec can make the requirements reviewable. Choose
+those steps when they answer a real design or correctness question. {AGENT: if this project is
+not mathematical or numerical, note that method-doc skills are unlikely to apply}
 
-What each phase reads and writes:
+Optional artifacts for work that uses the spec workflow:
 
 - `docs/methods/<method>.md` - the mathematical document, from `write-method-docs`
 - `specs/<module>.md` - the engineering specification, from `generate-spec`
-- `STATE.md` - per-module progress; `generate-spec` and `implement-spec` both update it
-- `PLAN.md` and `TODO.md` - scratch files `implement-spec` writes at the root and deletes once
-  the module is done
+- `STATE.md` - per-module progress when a module is tracked through a spec
+- A short plan in an existing tracker, or a new file only when it helps multi-session work
 
 `STATE.md` ships as a scaffold with no modules listed yet. `docs/methods/` and `specs/` do not
-exist; create each when its first document lands. Data and plumbing modules skip the method
-document and go straight to a spec.
+exist; create each when its first document is useful. Data and plumbing modules need a spec only
+when their behavior or interfaces require one.
 
 {% endif -%}
 
@@ -186,10 +188,10 @@ Structure:
 {%- endif %}
 {%- if cookiecutter.coding_agent != 'None' %}
 - `.claude/skills/` - agent skills
-- `STATE.md` - per-module progress tracker; `generate-spec` and `implement-spec` read and update it
+- `STATE.md` - optional per-module tracker for work using a spec
 {%- endif %}
 - `.github/workflows/` - CI configuration
-- {AGENT: list other important folders and confirm with user}
+- {AGENT: list other important folders from the repository; ask if their purpose is unclear}
 
 {% if cookiecutter.python_interop == 'extension' -%}
 `crates/*/tests/` belongs to cargo; the top-level `tests/` and `scripts/test_*.py` belong to

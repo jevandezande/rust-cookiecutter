@@ -11,35 +11,23 @@ allowed-tools:
 ---
 
 Do a final cleanup pass on the code in $ARGUMENTS (or the current package if no argument is given).
+Focus on the changed code and the project gate rather than rerunning every tool after every edit.
 
 Use the `write-code` skill to understand code conventions.
 Use the `test-code` skill to understand test conventions.
 Use the `write-doc-comments` skill to understand doc comment conventions.
 
-Work through this checklist:
+Review the diff for:
 
-1. Formatting:
-   - Run `mise run fmt` to format the codebase.
-
-2. Linting:
-   - Run `mise run clippy` and fix all warnings.
-
-3. Safety:
-   - Scan the diff for new `unsafe` blocks. Each needs `#[expect(unsafe_code)]` and a `// SAFETY:`
-     comment.
-
-4. Code Polish:
-   - Remove dead code, unused imports, and commented-out code.
+- Dead code, unused imports, commented-out code, and avoidable complexity.
+- Public APIs whose names, ownership, errors, or documentation are unclear.
+- New `unsafe` blocks. Check the workspace lint: `forbid` rules out unsafe; under `deny`, an
+  explicit exception needs a sound `// SAFETY:` explanation.
 {interop_rules}
 
-5. Documentation:
-   - Check every public item the diff added or changed against `write-doc-comments`.
-   - Run `mise run docs` and fix broken intra-doc links.
+Check changed public items against `write-doc-comments`. Run `mise run fmt` if formatting is
+needed, then `mise run all` as the final local gate. It covers linting, docs, Rust tests, and the
+mode's Python tests. Run a narrower check again only when its failure or a later edit calls for
+it. Report any check that could not run.
 
-6. Tests:
-   - Run `mise run test` and `mise run py-test`.
-
-7. Final Check:
-   - `mise run check` must pass before finishing.
-
-If cleanup turns up a real bug rather than a style or lint issue, switch to the `debug-code` skill.
+If cleanup turns up a real bug, use `debug-code` to diagnose and test the fix.

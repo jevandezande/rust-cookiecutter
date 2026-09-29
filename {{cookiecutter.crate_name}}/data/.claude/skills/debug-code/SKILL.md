@@ -54,7 +54,8 @@ Pick the strategy for the error category:
 - Insert `assert!(value.is_finite(), "...")` guards at intermediate steps to find where NaN or Inf
   first appears.
 - Compare `f32` vs `f64` results to identify precision-sensitive operations.
-- Check for division by zero or near-zero denominators (add epsilon guards).
+- Check for division by zero or near-zero denominators. Choose a guard only when the method
+  defines its behavior; an arbitrary epsilon can hide a bug or change valid results.
 - Check for catastrophic cancellation when subtracting nearly equal large numbers.
 - Verify loop bounds and index calculations. If a spec or method doc exists, check against it.
 - Check convergence criteria: is the threshold too tight for the precision used?
@@ -79,17 +80,16 @@ Pick the strategy for the error category:
 1. Fix the root cause with the smallest change that does it.
 2. Add a regression test for the bug.
 3. Add or improve `// SAFETY:` comments, `debug_assert!` guards, or documentation.
-4. If the fix changes observable behavior, note whether any spec or method doc needs updating. Do
-   not update those docs in this skill.
+4. If the fix changes documented behavior, update the affected spec, method doc, or API docs as
+   part of the fix.
 
 ---
 
 ### Phase 5: Verify
 
 1. Run the previously failing test: confirm it passes.
-2. Run the full test suite for the affected crate: `cargo test -p <crate>`.
-3. Run clippy: `cargo clippy --workspace --all-targets -- -D warnings`.
-4. If the bug was in a hot path, say that the benchmarks need rerunning (the `benchmark-code`
-   skill).
+2. Run the affected crate's tests, then `mise run all` for the final project gate when available.
+3. If the bug was in a hot path with a performance target, rerun the relevant benchmark using
+   `benchmark-code`.
 
 For slow test suites, use the `async-workflows` skill to run verification in the background.

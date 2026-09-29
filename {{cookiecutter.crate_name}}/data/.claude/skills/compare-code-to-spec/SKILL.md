@@ -1,147 +1,38 @@
 ---
 name: compare-code-to-spec
-description: Audits existing code against its specification and method documentation, generating a drift report with suggested updates.
+description: Review Rust behavior against an existing spec and report meaningful gaps or changed assumptions.
 argument-hint: <spec-file-or-module-name>
 allowed-tools:
   - Read
   - Glob
   - Grep
   - Bash
-  - Task
 ---
 
-# Compare Code to Specification
+# Compare Code to a Specification
 
-Use this skill to audit an implementation against its specification and method documentation.
-It makes no edits. It reports drift, missing features, and deviations, and suggests updates for
-the user to approve.
+Use this skill to review an implementation against its spec. Report findings without editing.
 
-## Workflow
+1. Locate the spec in `specs/`, the source, its tests, related method docs if relevant, and
+   `STATE.md` if it tracks the module. Continue when an optional artifact is absent.
+2. Extract observable requirements: public behavior, errors, invariants, compatibility,
+   numerical tolerances, performance targets, and acceptance cases. Mark exact types, fields,
+   signatures, or algorithms as binding only when the spec says why they must be preserved.
+3. Trace each requirement through code and tests. Run focused checks if inspection cannot
+   establish the result. Check important edge cases and what callers can observe.
+4. Compare method equations and numerical requirements where the module implements a documented
+   method. Equivalent formulations are acceptable when they satisfy the stated constraints.
 
-### Phase 1: Locate Artifacts
-
-`$ARGUMENTS` is a spec file path or a module name.
-
-1. Find the spec in `specs/`. For a module name, look for `specs/<module-name>.md` or similar.
-2. Find method documentation in `docs/methods/`, if that directory exists.
-3. Find a research brief in `docs/methods/research/`, if that directory exists.
-4. Find the source with `glob` and `grep`.
-5. Check `STATE.md` for pipeline status, if that file exists.
-
-Note any missing artifact in the report and continue with what exists.
-
----
-
-### Phase 2: Parse Spec Requirements
-
-Extract from the spec:
-
-- Implementation steps - the ordered list of work items
-- Data structures - struct names, field types, layout requirements
-- Function signatures - public API surface
-- Test requirements - expected test cases and validation criteria
-- Dependency requirements - crates, features
-
----
-
-### Phase 3: Parse Method Documentation
-
-Extract from the method doc:
-
-- Key equations and their variable definitions
-- Algorithm description - expected computational procedure
-- Numerical considerations - precision, stability requirements
-- Performance characteristics - expected complexity, memory usage
-
----
-
-### Phase 4: Audit Code Against Spec
-
-For each spec requirement, determine its status in the codebase:
+Report each finding with a code location and one of these statuses:
 
 | Status | Meaning |
-|---|---|
-| Implemented | Code fully satisfies the requirement. |
-| Partial | Code exists but is incomplete or differs in scope. |
-| Missing | No corresponding code found. |
-| Deviated | Code implements the requirement differently than specified. |
-| Extra | Code that no spec requirement covers. |
+| --- | --- |
+| Satisfied | Evidence shows the behavior or constraint holds. |
+| Unverified | The evidence is insufficient; name the check needed. |
+| Mismatch | Observable behavior or a binding constraint differs. |
+| Spec outdated | The implementation changed intentionally and the spec needs revision. |
 
-Specific checks:
-
-1. Compare struct definitions against spec data structures (field names, types, derives).
-2. Compare function signatures against spec API surface.
-3. Check that specified tests exist and cover the required cases.
-
----
-
-### Phase 5: Audit Code Against Method Documentation
-
-Verify mathematical correctness:
-
-1. For each key equation in the method doc, find the corresponding code and check that it
-   matches.
-2. Check the numerical requirements: `f64` where required, stability guards where specified.
-3. Check that the algorithm follows the documented procedure: loop nesting, summation order.
-4. Check that `rustdoc` comments reference the correct equations.
-
----
-
-### Phase 6: Generate Drift Report
-
-Present findings in this format:
-
-```markdown
-## Drift Report: <Module Name>
-
-**Spec:** `specs/<module>.md`
-**Method Doc:** `docs/methods/<topic>.md`
-**Source:** `src/<path>/`
-**STATE.md status:** [current status]
-
-### Summary
-
-*One-paragraph overview of conformance.*
-
-### Spec Conformance
-
-| # | Spec Requirement | Status | Code Location | Notes |
-|---|---|---|---|---|
-| 1 | [requirement] | Implemented / Partial / Missing / Deviated | file:line | [details] |
-| ... | ... | ... | ... | ... |
-
-### Method Doc Conformance
-
-| Equation / Section | Status | Code Location | Notes |
-|---|---|---|---|
-| Eq. (N): [description] | Correct / Incorrect / Missing | file:line | [details] |
-| ... | ... | ... | ... |
-
-### Undocumented Code
-
-*Code that exists but has no corresponding spec or method doc coverage.*
-
-| Code Location | Description | Suggested Action |
-|---|---|---|
-| file:line | [what the code does] | Add to spec / Remove / Investigate |
-
-### Suggested Updates
-
-*Prioritized list of changes. Each says whether to update the code, the spec,
-or the method doc.*
-
-1. **[Priority: High/Medium/Low]** [Description of change needed]. Update: [code / spec / method doc].
-2. ...
-```
-
----
-
-### Phase 7: Suggest Next Steps
-
-After presenting the report:
-
-1. Make no edits.
-2. Ask the user which suggestions to act on.
-3. For code changes, suggest the `implement-spec` skill.
-4. For spec changes, suggest the `generate-spec` skill.
-5. For method doc changes, suggest the `write-method-docs` skill.
+Prioritize mismatches by impact. Explain suggested code, test, or spec updates and the evidence
+for each. Do not flag extra code, private struct layout, or a different loop order as drift by
+itself. If a changed loop order affects numerical results or a specified performance bound,
+report that effect. State which checks ran and what remains unverified.

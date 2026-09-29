@@ -1,6 +1,6 @@
 ---
 name: optimize-code
-description: Guidelines for taking functional code and tuning it for CPU cycles and cache locality.
+description: Improve Rust performance when a representative workload shows a meaningful bottleneck.
 argument-hint: [directory or file]
 allowed-tools:
   - Read
@@ -10,33 +10,26 @@ allowed-tools:
   - Bash
 ---
 
-When optimizing algorithms in this project, follow these principles to cut CPU cycles and improve
-cache use.
+# Optimize Rust Code
 
-### 1. Data-Oriented Design (DOD)
+Start with a performance target and representative inputs. Profile or measure the current path
+to identify where time or memory goes. Use `benchmark-code` to record a baseline and compare
+the change; a faster microbenchmark is useful only if it improves the workload that matters.
 
-- AoS vs. SoA: when a linear pass over a large collection is slow, check whether an array of
-  structs is the cause and switch to a struct of arrays if it is.
-- Cache locality: keep hot data contiguous and avoid pointer chasing. Memory latency, not compute,
-  is usually the bottleneck.
+Choose a change that addresses the measured cost. Possibilities include avoiding repeated work,
+reducing allocations, improving data locality, batching boundary calls, or changing an algorithm.
+Consider AoS versus SoA, inlining, vectorization, and concurrency only when the profile or data
+size makes them relevant. `#[inline]` is a hint, and `#[inline(always)]` can increase code size.
 
-### 2. Inlining & Loop Unrolling
+Keep toolchain and numerical constraints in view:
 
-- `#[inline]`: mark small, hot functions called from tight loops, so the call disappears and the
-  body is exposed to the caller. Use `#[inline(always)]` sparingly.
-- Auto-vectorization: write loops LLVM can turn into SIMD. Keep branching and data dependencies
-  out of the tightest loops.
-- Explicit SIMD: if auto-vectorization fails on a critical bottleneck, consider `std::simd` or
-  `wide`.
+- `std::simd` requires nightly. For a stable project, consider auto-vectorizable code, a suitable
+  stable crate, or target-specific intrinsics with an explicit safety and portability review.
+- Precomputed reciprocals and `mul_add` can change floating-point results. Check the required
+  tolerance and measure on target hardware; fused multiply-add is not always faster.
+- Preserve error behavior and public contracts while optimizing. Add a regression test when the
+  change creates a realistic correctness risk.
 
-### 3. Mathematical Optimizations
-
-- Reciprocals: replace a division (`x / y`) with a multiplication (`x * (1.0 / y)`) when `1.0 / y`
-  can be precomputed or hoisted out of the loop.
-- FMA: where the algorithm does not need bit-exact IEEE 754 results, `f32::mul_add` (fused
-  multiply-add) is faster and slightly more precise.
-
----
-
-Measure with the `benchmark-code` skill before and after. Confirm correctness with the `test-code`
-skill.
+Run the relevant tests and compare measurements before and after. Report the workload, baseline,
+result, and any numerical or portability tradeoff. Keep a reference implementation only when it
+helps test or explain the optimized code.
