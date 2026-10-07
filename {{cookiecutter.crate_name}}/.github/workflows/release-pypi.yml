@@ -92,8 +92,9 @@ jobs:
       # ignored off Linux, where the build runs on the runner instead of in a container.
       - uses: PyO3/maturin-action@v1.51.0
         with:
+          maturin-version: v1.15.0
           target: ${{ matrix.target }}
-          args: --release --out dist
+          args: --release --locked --out dist
           manylinux: auto
           sccache: 'true'
 
@@ -110,8 +111,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
+      - run: cargo metadata --locked --format-version 1 > /dev/null
+
       - uses: PyO3/maturin-action@v1.51.0
         with:
+          maturin-version: v1.15.0
           command: sdist
           args: --out dist
 

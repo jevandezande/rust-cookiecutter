@@ -37,6 +37,7 @@ dev = [
 package = true
 
 [tool.maturin]
+include = [{ path = "Cargo.lock", format = "sdist" }]
 manifest-path = "crates/py/Cargo.toml"
 module-name = "{{cookiecutter.__package_name}}._core"
 python-source = "python"

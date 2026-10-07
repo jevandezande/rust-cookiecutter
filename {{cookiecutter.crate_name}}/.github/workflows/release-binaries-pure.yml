@@ -87,7 +87,7 @@ jobs:
       # `--bins` builds only what ships. Under `python_interop=extension` the workspace also holds
       # the `crates/py` cdylib, which needs a Python interpreter to link against and is not shipped
       # here
-      - run: cargo build --release --bins
+      - run: cargo build --release --locked --bins
 
       # This workflow ships unrendered, so cargo names the executable rather than the template.
       # The build above already did the work; this pass only re-emits the artifact paths. A read
@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           mkdir dist
-          cargo build --release --bins --message-format=json |
+          cargo build --release --locked --bins --message-format=json |
             jq -r 'select(.executable != null) | .executable' |
             while IFS= read -r executable; do cp "$executable" dist/; done
 
