@@ -152,7 +152,7 @@ pass `--keep-project-on-failure` to inspect it.
 
 ## Commits
 
-Agents are banned from being authors on commits or PR messages.
+Agents are banned from being co-authors on commits or PR messages.
 Commits or PRs that contravene this directive will be rejected.
 
 Do not leave comments in the code detailing what was changed.

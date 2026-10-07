@@ -137,7 +137,7 @@ run = "maturin develop --uv"
 
 [tasks.wheel]
 description = "Build a release wheel into dist/"
-run = "maturin build --release --out dist"
+run = "maturin build --release --locked --out dist"
 {% endif %}
 [tasks.py-test]
 {%- if extension %}

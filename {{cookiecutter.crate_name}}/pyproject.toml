@@ -1,6 +1,6 @@
 {%- if cookiecutter.python_interop == 'extension' -%}
 [build-system]
-requires = ["maturin>=1.15,<2"]
+requires = ["maturin==1.15.0"]
 build-backend = "maturin"
 
 [project]
@@ -23,7 +23,7 @@ dependencies = []
 [dependency-groups]
 dev = [
 {%- if cookiecutter.python_interop == 'extension' %}
-    "maturin>=1.15,<2",
+    "maturin==1.15.0",
 {%- endif %}
     "prek>=0.5.2",
     "pytest>=9.1",

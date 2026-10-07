@@ -32,6 +32,10 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2.9.2
 
+      - name: Verify Cargo.lock
+        shell: bash
+        run: cargo metadata --locked --format-version 1 > /dev/null
+
       - run: uv sync --locked
 {%- if cookiecutter.python_interop == 'embedded' %}
 
