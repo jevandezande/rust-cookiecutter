@@ -147,17 +147,26 @@ Wired in:
 - [criterion](https://github.com/bheisler/criterion.rs): benchmarks in `crates/core/benches`,
   plus `crates/py/benches` under `python_interop=embedded`, via `mise run bench`
 - `[profile.release]`: thin LTO and `codegen-units = 1`
+- `[profile.dev.package."*"]`: `opt-level = 3` and `debug = "line-tables-only"`. Workspace crates
+  keep full debug info. `cargo test` uses the dev profile, so this covers test builds
 - `[profile.profiling]`: release plus debug symbols, via `mise run profile-build`
-- `.cargo/config.toml`: commented-out fast-linker and `target-cpu=native` settings
+- `.cargo/config.toml`: knobs to uncomment after `cargo build --timings`. Drop dependency debug
+  info, then workspace line tables, mold on Linux, and `target-cpu=native`. Rust 1.90
+  and later use rust-lld on `x86_64-unknown-linux-gnu`. mold stays out of `mise.toml` because
+  `mise.lock` resolves every tool on Linux, macOS, and Windows
 - [cargo-deny](https://github.com/EmbarkStudios/cargo-deny): license and advisory auditing in CI
   (`mise run deny` locally); pinned in the generated `mise.toml`
 - [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov): coverage, via `mise run coverage`
 
-Not wired in, but easy to add:
+Not wired in. Add one in a generated project when the case below applies:
 
 - [samply](https://github.com/mstange/samply): sampling profiler that reads the profiling profile
-- [cargo-nextest](https://nexte.st/): faster test runner
-- [cargo-machete](https://github.com/bnjbvr/cargo-machete): finds unused dependencies
+- [cargo-nextest](https://nexte.st/): faster runner for a large or flaky suite. It skips doctests,
+  so keep `cargo test --doc`. `mise run test` stays on `cargo test`
+- [cargo-shear](https://github.com/Boshen/cargo-shear): unused dependencies on stable. A use that
+  exists only in a macro (`--expand`, nightly) or only in the `[features]` table is missed; list
+  it in `[workspace.metadata.cargo-shear].ignored`. Nightly `cargo check -Zcargo-lints` warns too,
+  and skips dev-dependencies
 
 ### Alternative installation methods
 

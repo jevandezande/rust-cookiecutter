@@ -203,10 +203,12 @@ where cargo would try to compile them.
 
 Key configuration files:
 
-- `Cargo.toml` - workspace members, shared metadata, profiles, and lint configuration
+- `Cargo.toml` - workspace members, shared metadata, profiles, and lints. In dev and test
+  builds, dependencies are `opt-level = 3` with line tables; workspace crates keep full debug info
 - `crates/*/Cargo.toml` - per-crate metadata; lints and versions inherit from the workspace
 - `Cargo.lock` - the Rust lockfile; committed
-- `.cargo/config.toml` - commented-out linker and target-cpu settings
+- `.cargo/config.toml` - commented steps for a slow build, after `cargo build --timings`: drop
+  dependency debug info, workspace line tables, mold on Linux, and `target-cpu=native`
 {%- if cookiecutter.python_interop == 'extension' %}
 - `pyproject.toml` - maturin build, dev dependency group, ruff, ty, and pytest configuration
 {%- else %}

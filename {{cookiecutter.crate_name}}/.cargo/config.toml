@@ -1,14 +1,41 @@
-# A faster linker is the single biggest improvement to edit-compile-test latency, but needs a tool
-# that is not installed by default.
+# Workspace crates keep full debug info. Dependencies (`[profile.dev.package."*"]`
+# in Cargo.toml) are opt-level 3 with line tables: locals are mostly optimized away,
+# and a panic still names a file and line. `cargo test` uses this dev profile.
 #
-# Linux, after installing mold:
-# [target.x86_64-unknown-linux-gnu]
-# linker = "clang"
+# Uncomment a block after `cargo build --timings` shows that step is slow. These
+# settings apply to this workspace only.
+# https://doc.rust-lang.org/cargo/guide/build-performance.html
+#
+# Dependency debug info. In Cargo.toml, drop it. A panic in a dependency then omits
+# the file and line.
+#
+# [profile.dev.package."*"]
+# debug = false
+#
+# Workspace debug info. Line tables keep backtraces. Parameters, locals, and `self`
+# drop out of the debugger. `dbg!` and tracing do not read debug info.
+#
+# [profile.dev]
+# debug = "line-tables-only"
+#
+# Linking. Rust 1.90 and later drive rust-lld through cc on
+# x86_64-unknown-linux-gnu. Other Linux targets use the system linker. macOS uses
+# ld-prime. Windows uses the MSVC linker.
+#
+# mold, for a large Linux ELF binary. GCC 12 and later accept `-fuse-ld=mold`, which
+# overrides rustc's `-fuse-ld=lld`. On an older GCC, set `linker = "clang"` in this
+# table. Keep mold out of `mise.toml`: `mise.lock` resolves every tool on Linux,
+# macOS, and Windows. A set `RUSTFLAGS` replaces this list. On Linux this table
+# replaces `[build].rustflags`; add `-C target-cpu=native` here to use both.
+#
+# [target.'cfg(target_os = "linux")']
 # rustflags = ["-C", "link-arg=-fuse-ld=mold"]
 #
-# macOS: the bundled ld-prime is already fast; nothing to configure.
-
-# Uncomment to build for the host CPU. Faster, but the result is not portable, so keep it out of
-# anything you ship and out of CI.
+# This CPU only. Leave commented for anything you ship and for CI. On Linux this
+# list is ignored while the target table above is uncommented.
+#
 # [build]
 # rustflags = ["-C", "target-cpu=native"]
+#
+# Cranelift and the parallel frontend speed debug builds and need nightly.
+# `rust-toolchain.toml` pins stable.

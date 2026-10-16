@@ -94,7 +94,11 @@ mise run all             # check + test + py-test
 {interop_notes}
 ## Performance
 
-`[profile.release]` uses thin LTO and a single codegen unit. `mise run bench` runs criterion over
+`[profile.release]` uses thin LTO and a single codegen unit. In dev and test builds, dependencies
+are `opt-level = 3` with line tables, so a panic in a dependency still names a file and line.
+Workspace crates keep full debug info.
+
+`mise run bench` runs criterion over
 {% if cookiecutter.python_interop == 'embedded' -%}
 the workspace: `crates/core/benches` measures the Rust core, and `crates/py/benches` measures
 the cost of crossing into the interpreter.
@@ -106,7 +110,16 @@ Results land in `target/criterion`.
 [samply](https://github.com/mstange/samply) is not among the pinned tools. Once installed,
 {% if cookiecutter.crate_type != 'lib' %}`samply record target/profiling/{{crate}}` reads the profiling build.{% else %}`samply record` over a bench binary reads the profiling build.{% endif %}
 
-`.cargo/config.toml` has commented-out settings for a faster linker and `target-cpu=native`.
+`.cargo/config.toml` lists what to change after `cargo build --timings` shows a slow step:
+drop dependency debug info, then line tables on workspace crates, mold on Linux, and
+`target-cpu=native`. Rust 1.90 and later already use rust-lld on `x86_64-unknown-linux-gnu`.
+
+`cargo test` stays the test command, because it runs doctests. [cargo-nextest](https://nexte.st/)
+is faster once the suite is large or flaky. It skips doctests, so keep `cargo test --doc`.
+[cargo-shear](https://github.com/Boshen/cargo-shear) reports unused dependencies on stable. It
+misses a use that exists only in a macro (`--expand`, nightly) or only in the `[features]`
+table; list those in `[workspace.metadata.cargo-shear].ignored`. Nightly
+`cargo check -Zcargo-lints` warns too, and skips dev-dependencies.
 
 ## Coverage
 
@@ -119,9 +132,9 @@ mise run coverage          # HTML report in target/llvm-cov/html
 mise run coverage-summary  # per-file table on stdout
 ```
 
-Coverage builds use their own `RUSTFLAGS`, so the first run after an ordinary `cargo build`
-recompiles the workspace, and the next plain build recompiles it back. Doctests are not counted:
-`cargo llvm-cov --doctests` needs nightly, and `rust-toolchain.toml` pins stable.
+Coverage writes its build to `target/llvm-cov-target`, separate from an ordinary `cargo build`.
+Doctests are not counted: `cargo llvm-cov --doctests` needs nightly, and `rust-toolchain.toml`
+pins stable.
 {% if cookiecutter.release_ci == 'crates.io' %}
 ## Releasing
 
