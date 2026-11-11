@@ -27,6 +27,8 @@ fn bench_best_score(c: &mut Criterion) {
 
     for size in [1_u32, 16, 256, 4096] {
         let xs: Vec<f64> = (0..size).map(f64::from).collect();
+        // Checked before timing: a fast wrong answer is not a result
+        assert_eq!(best_score(&Doubler, &xs).unwrap(), Some(f64::from(size - 1) * 2.0));
         group.throughput(Throughput::Elements(u64::from(size)));
 
         group.bench_with_input(BenchmarkId::from_parameter(size), &xs, |b, xs| {

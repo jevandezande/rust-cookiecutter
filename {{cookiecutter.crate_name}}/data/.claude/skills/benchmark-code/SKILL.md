@@ -25,6 +25,13 @@ introduce a second harness.
   directory; `crates/py/benches` exists only where the Python boundary is worth measuring.
 - Use `criterion_group!` / `criterion_main!` as the existing files do.
 - Use `std::hint::black_box` on inputs and outputs so LLVM cannot delete the work.
+- Check each case's answer before timing it, outside `b.iter`: against a simple
+  implementation, a known value, or an invariant such as a conserved quantity. A bench that
+  times a wrong answer is worse than none.
+- Time in a bench, never in a test or an example. A test checks an answer; a bench measures it.
+
+`mise run test` runs every bench once, untimed (`cargo test --benches`), so a failed check or a
+panic fails the test run. Keep each bench's setup cheap enough to run there unoptimized.
 
 Use criterion for repeatable microbenchmarks. End-to-end timing may use other suitable tools when
 it better captures startup, I/O, or boundary costs.
@@ -42,10 +49,11 @@ use criterion::{BenchmarkId, Criterion, Throughput};
 fn scale(c: &mut Criterion) {
     let mut group = c.benchmark_group("score_all");
     for n in [16_u32, 256, 4096] {
+        let xs: Vec<f64> = (0..n).map(f64::from).collect();
+        assert_eq!(score_all(&xs), reference_score_all(&xs));
         group.throughput(Throughput::Elements(u64::from(n)));
-        group.bench_with_input(BenchmarkId::from_parameter(n), &n, |b, &n| {
-            let xs: Vec<f64> = (0..n).map(f64::from).collect();
-            b.iter(|| black_box(score_all(black_box(&xs))));
+        group.bench_with_input(BenchmarkId::from_parameter(n), &xs, |b, xs| {
+            b.iter(|| black_box(score_all(black_box(xs))));
         });
     }
     group.finish();

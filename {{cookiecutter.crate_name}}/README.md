@@ -66,7 +66,7 @@ activates `.venv`, and defines every task. `cd` into the project and mise syncs 
 ```sh
 mise tasks               # list every task
 mise run build           # cargo build --workspace
-mise run test            # cargo test --workspace
+mise run test            # cargo test --workspace, then each bench once, untimed
 {%- if cookiecutter.python_interop == 'extension' %}
 mise run develop         # build the extension module into .venv, in place
 mise run wheel           # release wheel into dist/

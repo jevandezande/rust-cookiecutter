@@ -49,6 +49,9 @@ fn bench_batching(c: &mut Criterion) {
     let mut group = c.benchmark_group("batch");
     for size in [1_u32, 16, 256, 4096] {
         let xs: Vec<f64> = (0..size).map(f64::from).collect();
+        // Checked before timing: `math.sqrt` and Rust's both round correctly, so they agree exactly
+        let expected: Vec<f64> = xs.iter().map(|x| x.sqrt()).collect();
+        assert_eq!(scorer.score_all(&xs).unwrap(), expected);
         group.throughput(Throughput::Elements(u64::from(size)));
 
         group.bench_with_input(BenchmarkId::new("per_element", size), &xs, |b, xs| {

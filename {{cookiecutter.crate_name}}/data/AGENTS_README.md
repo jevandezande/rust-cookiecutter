@@ -95,7 +95,7 @@ All tasks run through [mise](https://mise.jdx.dev), which also provides the dev 
 ```sh
 mise tasks                  # list every task
 mise run build              # cargo build --workspace
-mise run test               # cargo test --workspace
+mise run test               # cargo test --workspace, then each bench once, untimed
 mise run fmt                # cargo fmt --all
 mise run fmt-check          # cargo fmt --all --check
 mise run clippy             # cargo clippy --workspace --all-targets -- -D warnings
