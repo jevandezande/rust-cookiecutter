@@ -41,7 +41,7 @@ A generated project has `crates/core` (pure Rust), `crates/py` (the Python bound
 - License and advisory auditing with [cargo-deny](https://embarkstudios.github.io/cargo-deny/)
 - Local coverage with [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) (`mise run coverage`)
 - Git hooks with [prek](https://prek.j178.dev)
-- Continuous integration with [GitHub Actions](https://github.com/features/actions)
+- Continuous integration with [GitHub Actions](https://github.com/features/actions), and a pull request template
 - Optional release workflow (tagged binaries, crates.io publish, or PyPI wheels)
 - Optional coding agent setup, including a full set of Rust [skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
 

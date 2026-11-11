@@ -274,4 +274,7 @@ To change the shared hooks, or to pre-approve permissions for this project, edit
 Agents are banned from being authors on commits or PR messages.
 Commits or PRs that contravene this directive will be rejected.
 
+Follow `.github/pull_request_template.md` for PR descriptions. With `gh pr create`, fill every
+section and pass the text with `--body-file`.
+
 Do not leave comments in the code detailing what was changed.

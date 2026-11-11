@@ -20,3 +20,4 @@ respect-gitignore = true
 
 [per-file-ignores]
 "**/skills/**/*.md" = ["MD041"]
+"**/.github/pull_request_template.md" = ["MD041"]  # GitHub supplies the title
