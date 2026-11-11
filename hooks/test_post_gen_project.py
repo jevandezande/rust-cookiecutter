@@ -368,25 +368,27 @@ def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.mark.parametrize(
-    ("agent", "settings"),
+    ("agent", "skills", "other_skills", "settings"),
     [
-        ("Claude", True),
-        ("Codex", False),
+        ("Claude", ".claude/skills", ".agents/skills", True),
+        ("Codex", ".agents/skills", ".claude/skills", False),
     ],
 )
 def test_setup_coding_agent_files_writes_the_agents_own_file(
-    agent_data: Path, agent: str, settings: bool
+    agent_data: Path, agent: str, skills: str, other_skills: str, settings: bool
 ) -> None:
     """Always write AGENTS.md, which every agent reads; only Claude gets settings.json.
 
-    Skills go to both agents, as reference, and `STATE.md` with them, since the spec skills read
+    Skills go where the agent discovers them: Claude Code reads `.claude/skills/` and Codex
+    `.agents/skills/`, neither the other's. `STATE.md` goes with them, since the spec skills read
     and update it; `settings.json` is Claude's settings and hooks.
     """
     post_gen_project.setup_coding_agent_files(agent)
 
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
     assert not (agent_data / "CLAUDE.md").exists()
-    assert (agent_data / ".claude" / "skills").is_dir()
+    assert (agent_data / skills).is_dir()
+    assert not (agent_data / other_skills).exists()
     assert (agent_data / ".claude" / "settings.json").exists() is settings
     assert (agent_data / "STATE.md").read_text(encoding="utf-8") == "progress tracker"
 
@@ -397,6 +399,7 @@ def test_setup_coding_agent_files_none_still_writes_agents_md(agent_data: Path) 
 
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
     assert not (agent_data / ".claude").exists()
+    assert not (agent_data / ".agents").exists()
     assert not (agent_data / "CLAUDE.md").exists()
     assert not (agent_data / "STATE.md").exists()
 

@@ -17,6 +17,8 @@ template body follows.
   - `data/` - post-gen hook staging data (deleted in produced template)
   - `data/interop/<mode>/` - files `set_interop()` copies over the project root
   - `data/STATE.md` - progress-tracker scaffold, copied to the root only when an agent is set up
+  - `data/.claude/skills/` - skills, copied to `.claude/skills/` under Claude and `.agents/skills/`
+    under Codex, since each agent reads only its own directory
   - `scripts/` - `check_msrv.py` and `bump_toolchain.py`
 - `hooks/` - cookiecutter hooks and their tests
 - `.github/workflows/` - CI that generates projects and runs checks

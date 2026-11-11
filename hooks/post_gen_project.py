@@ -434,14 +434,15 @@ def setup_coding_agent_files(agent: str) -> None:
         return
 
     logger.info(f"Setting up files for {coding_agent.value}")
-    shutil.copytree("data/.claude", ".claude")
     shutil.copy(Path("data/STATE.md"), Path("STATE.md"))
 
+    # Each agent discovers skills in its own directory only
     match coding_agent:
         case CodingAgent.CLAUDE:
+            shutil.copytree("data/.claude", ".claude")
             cmd = "claude -p 'Read AGENTS.md and update it'"
         case CodingAgent.CODEX:
-            Path(".claude/settings.json").unlink()
+            shutil.copytree("data/.claude/skills", ".agents/skills")
             cmd = "codex exec 'Read AGENTS.md and update it'"
         case _:
             assert_never(coding_agent)

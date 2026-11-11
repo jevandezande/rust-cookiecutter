@@ -35,10 +35,11 @@ and ran them over the tree, so the environment needs no verification.
 5. {AGENT: Delete this checklist and the "Understanding {AGENT: ...} directives" section}
 
 {% if cookiecutter.coding_agent != 'None' -%}
+{%- set skills = '.agents/skills' if cookiecutter.coding_agent == 'Codex' else '.claude/skills' -%}
 
 ## AI Skills
 
-This project ships agent skills in `.claude/skills/`. Load the relevant one before working;
+This project ships agent skills in `{{ skills }}/`. Load the relevant one before working;
 do not change code without consulting it.
 
 | Skill | Use when |
@@ -187,7 +188,7 @@ Structure:
 - `scripts/` - toolchain helpers (`check_msrv.py`, `bump_toolchain.py`) and their pytest tests
 {%- endif %}
 {%- if cookiecutter.coding_agent != 'None' %}
-- `.claude/skills/` - agent skills
+- `{{ skills }}/` - agent skills
 - `STATE.md` - optional per-module tracker for work using a spec
 {%- endif %}
 - `.github/workflows/` - CI configuration
