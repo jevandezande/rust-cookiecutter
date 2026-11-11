@@ -1,0 +1,13 @@
+## Layout
+
+{% if cookiecutter.crate_type != 'lib' -%}
+- `scripts/` holds the toolchain helpers and the bundler (`bundle.py`, `smoke_bundle.py`), with
+  their tests beside them as `scripts/test_<script>.py`.
+{%- else -%}
+- `scripts/` holds the toolchain helpers, with their tests beside them as
+  `scripts/test_<script>.py`.
+{%- endif %}
+- Do not add first-party `.py` files for Rust to run. `[project.dependencies]` is what the
+  embedded interpreter imports, through `import_fn` in `crates/py`; see `write-code`.
+- pytest collects `scripts/` with `--doctest-modules`, so every module there is imported at
+  collection and every docstring example runs.

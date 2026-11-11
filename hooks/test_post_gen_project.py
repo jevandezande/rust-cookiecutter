@@ -168,7 +168,9 @@ def test_every_mode_ships_a_fragment_for_every_site(template: Path, interop: str
     for target, placeholder in post_gen_project.INTEROP_FRAGMENTS.values():
         text = (template / target).read_text(encoding="utf-8")
         assert placeholder not in text, target
-        assert "\n\n\n" not in text, f"MD012: {target} gained a doubled blank line"
+        # MD012 skips fenced code, where Python's two blank lines between definitions belong
+        prose = re.sub(r"^```.*?^```", "```", text, flags=re.DOTALL | re.MULTILINE)
+        assert "\n\n\n" not in prose, f"MD012: {target} gained a doubled blank line"
 
 
 def test_set_interop_fails_on_a_missing_fragment(crate: Path) -> None:

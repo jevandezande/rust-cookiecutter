@@ -115,6 +115,8 @@ INTEROP_FRAGMENTS = {
     "test-code.md.in": ("data/.claude/skills/test-code/SKILL.md", "{interop_rules}"),
     "cleanup-code.md.in": ("data/.claude/skills/cleanup-code/SKILL.md", "{interop_rules}"),
     "generate-spec.md.in": ("data/.claude/skills/generate-spec/SKILL.md", "{interop_rules}"),
+    "write-python.md.in": ("data/.claude/skills/write-python/SKILL.md", "{interop_rules}"),
+    "test-python.md.in": ("data/.claude/skills/test-python/SKILL.md", "{interop_rules}"),
 }
 
 

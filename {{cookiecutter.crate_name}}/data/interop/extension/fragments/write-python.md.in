@@ -1,0 +1,17 @@
+{%- set pkg = cookiecutter.__package_name -%}
+## Layout
+
+- `python/{{pkg}}/` is the package callers import. `__init__.py` re-exports the public API and
+  `_core.pyi` types the compiled module. Logic belongs in Rust; Python here is re-exports and
+  thin wrappers. Callers and tests import `{{pkg}}`, never `{{pkg}}._core`.
+- `_core.pyi` holds signatures only, in step with the `#[pymodule]` surface in `crates/py`.
+  ruff's `PYI` rules reject docstrings in a stub, and `help()` shows the Rust doc comment pyo3
+  copies into `__doc__`, so document a `#[pyfunction]` or `#[pyclass]` in Rust with
+  `write-doc-comments`.
+- A Rust error reaches Python as the module's own exception class, such as `ScoreError`. Catch
+  and document that class, not a base it derives from.
+- `tests/` is pytest over the Rust/Python boundary. `scripts/` holds the toolchain helpers, with
+  their tests beside them as `scripts/test_<script>.py`.
+- pytest collects `python/`, `scripts/`, and `tests/` with `--doctest-modules`, so every module
+  there is imported at collection and every docstring example runs. `mise run py-test` builds
+  the extension first.

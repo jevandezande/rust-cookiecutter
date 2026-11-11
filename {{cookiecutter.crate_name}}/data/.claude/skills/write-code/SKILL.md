@@ -14,7 +14,8 @@ allowed-tools:
 
 Use this skill when writing or editing Rust in this workspace. Use `port-code` when rewriting
 existing code in Rust, `write-doc-comments` when documenting public items, and `test-code` when
-adding tests. Use `cleanup-code` for a final review when the change warrants one.
+adding tests. Use `cleanup-code` for a final review when the change warrants one. Python has its
+own skills: `write-python`, `write-docstrings`, and `test-python`.
 
 ## Layout
 

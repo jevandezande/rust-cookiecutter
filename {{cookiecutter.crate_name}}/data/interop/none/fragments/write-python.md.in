@@ -1,0 +1,8 @@
+## Layout
+
+- `scripts/` holds the toolchain helpers, with their tests beside them as
+  `scripts/test_<script>.py`. There is no first-party package and no Python interop; do not add
+  either. Logic belongs in Rust.
+- pytest collects `scripts/` with `--doctest-modules`, so every module there is imported at
+  collection and every docstring example runs.
+- `[project.dependencies]` stays empty: nothing imports it. Dev tools go in the `dev` group.

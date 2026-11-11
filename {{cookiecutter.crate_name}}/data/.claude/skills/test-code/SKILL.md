@@ -12,6 +12,8 @@ allowed-tools:
 
 # Testing Guidelines
 
+This skill covers Rust tests. pytest has its own skill, `test-python`.
+
 ## 1. Test Organization
 
 - Inline unit tests: isolated logic and private helpers go in a `#[cfg(test)] mod tests` block at

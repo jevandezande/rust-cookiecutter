@@ -79,7 +79,8 @@ details live in `mise.toml` alone.
 
 `set_interop()` copies `data/interop/<mode>/` over the project root, then substitutes each `.md.in`
 fragment into `{interop_notes}` and `{interop_rules}` in `README.md`, `data/AGENTS_README.md`, and
-the write-code, test-code, cleanup-code, and generate-spec skills. It runs before `set_crate_type()`.
+the write-code, test-code, cleanup-code, generate-spec, write-python, and test-python skills. It
+runs before `set_crate_type()`.
 
 Pick one of three mechanisms:
 

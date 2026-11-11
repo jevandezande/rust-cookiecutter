@@ -47,7 +47,10 @@ do not change code without consulting it.
 | `write-code` | Writing idiomatic Rust and reviewing API and ownership choices |
 | `port-code` | Rewriting existing code in Rust while checking behavioral parity |
 | `write-doc-comments` | Writing or reviewing rustdoc doc comments |
-| `test-code` | Writing tests |
+| `test-code` | Writing Rust tests |
+| `write-python` | Writing or reviewing Python |
+| `write-docstrings` | Writing or reviewing Python docstrings |
+| `test-python` | Writing pytest tests |
 | `debug-code` | Diagnosing a failure |
 | `explain-code` | Explaining existing code |
 | `cleanup-code` | Tidying without changing behavior |
@@ -63,10 +66,11 @@ do not change code without consulting it.
 
 ### Development workflows
 
-Use `write-code` and `test-code` for ordinary Rust changes. Use `port-code` when rewriting an
-existing program or module; compare its observable behavior with the original. For complex
-scientific methods, method documentation and a spec can make the requirements reviewable. Choose
-those steps when they answer a real design or correctness question. {AGENT: if this project is
+Use `write-code` and `test-code` for ordinary Rust changes, and `write-python` and `test-python`
+for Python. Use `port-code` when rewriting an existing program or module; compare its observable
+behavior with the original. For complex scientific methods, method documentation and a spec can
+make the requirements reviewable. Choose those steps when they answer a real design or
+correctness question. {AGENT: if this project is
 not mathematical or numerical, note that method-doc skills are unlikely to apply}
 
 Optional artifacts for work that uses the spec workflow:

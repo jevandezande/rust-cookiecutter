@@ -1,0 +1,11 @@
+{%- set pkg = cookiecutter.__package_name -%}
+## Where tests go
+
+- `tests/test_<area>.py` tests the boundary: what a caller of `{{pkg}}` sees. Cover the crossing
+  (conversion, a Rust error arriving as `ScoreError`, several threads), not the Rust logic
+  behind it, which has its own `#[test]`s.
+- Import from `{{pkg}}`, never `{{pkg}}._core`. `tests/test_stubs.py` is the exception: it
+  compares the stub with the compiled module itself.
+- `scripts/test_<script>.py` sits beside the script it tests and imports it by module name.
+- Never put Python tests where cargo compiles them, under a crate's `tests/`.
+- `mise run py-test` rebuilds the extension first; pytest cannot import what has not been built.

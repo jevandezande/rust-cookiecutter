@@ -1,0 +1,6 @@
+## Where tests go
+
+- `scripts/test_<script>.py` sits beside the script it tests and imports it by module name.
+- The embedding boundary is tested in Rust, in `crates/py`; see `test-code`. pytest covers
+  `scripts/` alone.
+- Never put Python tests where cargo compiles them, under a crate's `tests/`.
