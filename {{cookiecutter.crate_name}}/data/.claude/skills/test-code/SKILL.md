@@ -40,18 +40,17 @@ assert!((scorer.score(9.0).unwrap() - 3.0).abs() < 1e-12);
 
 ## 4. Optional Crates
 
-`rstest` and `proptest` are not dependencies. Add them when a table of cases or a property earns
+`rstest` and `proptest` are not dependencies. Add when a table of cases or a property needs
 them, not for a single extra `#[test]`.
 
-## 5. Tests That Need What a Machine May Lack
+## 5. Tests When Missing Hardware
 
-A test never checks for a device, a program, or a file and returns early: libtest counts that as
-a pass, so a machine that cannot run the test reports it green. Gate it so the run shows what it
-skipped, and give the reason a reader can act on:
+Tests may check for a device, a program, or a file and returns early if missing and libtest can
+count that as a pass. Gate it so the run shows what it skipped, and give an actionable reason.
 
-- a platform or an optional feature:
+- Platform or an optional feature:
   `#[cfg_attr(not(target_os = "linux"), ignore = "needs Linux")]`. Use `#[cfg(...)]` only when
   the test does not compile elsewhere
-- an external program, the network, or a large fixture: `#[ignore = "needs <what>"]`, run with
+- External program, the network, or a large fixture: `#[ignore = "needs <what>"]`, run with
   `cargo test -- --ignored` where it is available
-- a release build: `#[cfg_attr(debug_assertions, ignore = "too slow unoptimized")]`
+- Release build: `#[cfg_attr(debug_assertions, ignore = "too slow unoptimized")]`

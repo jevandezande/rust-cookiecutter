@@ -42,5 +42,13 @@ constraints, and design decisions. Link relevant method docs or source reference
 implementation outline only if it helps sequence substantial work; allow the implementer to
 revise it as evidence emerges.
 
+A spec states the contract the code meets now or will meet. Keep these out of it:
+
+- Progress, dates, and "now done" notes: they go in `STATE.md`, the issue, or the pull request.
+- Measurements and run logs: they go in the pull request or a note the spec links. A spec may
+  cite a number that sets an acceptance gate or justifies a decision.
+- How the design got here: state the decision and the reason. Name a rejected alternative only
+  when someone would otherwise try it again.
+
 If `STATE.md` tracks this module, mark the spec complete and name the next action. Run
 `mise run md-fmt` after writing the spec.
