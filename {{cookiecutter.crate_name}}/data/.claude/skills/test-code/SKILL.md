@@ -42,3 +42,16 @@ assert!((scorer.score(9.0).unwrap() - 3.0).abs() < 1e-12);
 
 `rstest` and `proptest` are not dependencies. Add them when a table of cases or a property earns
 them, not for a single extra `#[test]`.
+
+## 5. Tests That Need What a Machine May Lack
+
+A test never checks for a device, a program, or a file and returns early: libtest counts that as
+a pass, so a machine that cannot run the test reports it green. Gate it so the run shows what it
+skipped, and give the reason a reader can act on:
+
+- a platform or an optional feature:
+  `#[cfg_attr(not(target_os = "linux"), ignore = "needs Linux")]`. Use `#[cfg(...)]` only when
+  the test does not compile elsewhere
+- an external program, the network, or a large fixture: `#[ignore = "needs <what>"]`, run with
+  `cargo test -- --ignored` where it is available
+- a release build: `#[cfg_attr(debug_assertions, ignore = "too slow unoptimized")]`
