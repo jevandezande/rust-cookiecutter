@@ -26,9 +26,8 @@ introduce a second harness.
 - Use `criterion_group!` / `criterion_main!` as the existing files do.
 - Use `std::hint::black_box` on inputs and outputs so LLVM cannot delete the work.
 - Check each case's answer before timing it, outside `b.iter`: against a simple
-  implementation, a known value, or an invariant such as a conserved quantity. A bench that
-  times a wrong answer is worse than none.
-- Time in a bench, never in a test or an example. A test checks an answer; a bench measures it.
+  implementation, a known value, or an invariant such as a conserved quantity.
+- Time in a bench, never in a test or an example.
 
 `mise run test` runs every bench once, untimed (`cargo test --benches`), so a failed check or a
 panic fails the test run. Keep each bench's setup cheap enough to run there unoptimized.

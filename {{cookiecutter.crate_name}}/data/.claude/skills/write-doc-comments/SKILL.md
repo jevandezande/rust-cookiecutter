@@ -33,7 +33,9 @@ const, or macro without a doc comment fails `mise run clippy`.
 7. No pseudo-annotations: the signature carries the types, so never restate a parameter's type
    beside its name. When prose does name a generic type, write it in full, `Option<T>` rather than
    `Option`, except in a bound
-8. Describe conditions in clear, complete language. A short fragment is fine when it reads well
+8. Describe conditions in clear, complete language. A short fragment is fine when it reads well.
+   Name the concrete condition and the concrete error: "Returns [`NegativeThreshold`] when
+   `threshold` is negative.", not "Returns an error."
 9. Backtick code identifiers; link important public items when a link helps navigation
 
 ## Example
@@ -46,7 +48,7 @@ const, or macro without a doc comment fails `mise run clippy`.
 ///
 /// # Errors
 ///
-/// Returns [`NegativeThreshold`] if `threshold` is negative.
+/// Returns [`NegativeThreshold`] when `threshold` is negative.
 ///
 /// # Examples
 ///
@@ -76,8 +78,8 @@ pub fn process_spam(
 /// A HashMap mapping categories to counts.          // ❌ unlinked type, repeats signature
 ///
 /// # Errors
-/// Returns an error if the threshold is negative.   // ❌ no blank line after the heading;
-///                                                  //    name the error for the caller
+/// Returns an error if something goes wrong.        // ❌ no blank line after the heading, and
+///                                                  //    names neither error nor condition
 ///
 /// # Example                                        // ❌ section is Examples, even for one
 ///
@@ -87,9 +89,12 @@ pub fn process_spam(
 ## Sections
 
 - `# Panics` — `clippy::missing_panics_doc` is `warn`, so any public function that can panic needs
-  one. Explain the condition that can panic.
+  one. Name the condition: "Panics when `xs` is empty.", not "Panics on bad input." An `expect`
+  on an unreachable branch still trips the lint; say what would have to go wrong and why it
+  cannot, rather than opening with "Cannot panic".
 - `# Errors` — `clippy::missing_errors_doc` is `warn`, so every public `fn` returning `Result`
-  needs one. Name the failures and what a wrapper propagates.
+  needs one. Name the error and its condition, and for a wrapper what it propagates: "As
+  [`Scorer::score_all`]; the first failure aborts the batch."
 - `# Safety` — only on `unsafe fn`. `unsafe_code` is `deny` or `forbid` at the workspace, so this
   is rare; when it applies, state the invariant the caller must uphold. Do not add the section to
   a safe function, and keep it distinct from the `// SAFETY:` comment on an `unsafe` block, which
@@ -135,7 +140,7 @@ Python-facing signature the way a Python caller reads it.
 
 ## Miscellaneous
 
-- Write from the caller's point of view.
+- Write from the caller's point of view, and address "the caller", never "you".
 - Line comments only. `//` and `///`, never `/* */`.
 - Do not restate the signature: "Takes an `f64` and returns an `f64`" says nothing the reader
   cannot see.
