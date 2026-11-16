@@ -44,8 +44,8 @@ fn best_score(py: Python<'_>, xs: Vec<f64>) -> PyResult<Option<f64>> {
 }
 
 /// The module Python imports as `{{pkg}}._core`.
-#[pymodule]
-fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pymodule(name = "_core")]
+fn core_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("ScoreError", m.py().get_type::<ScoreError>())?;
     m.add_function(wrap_pyfunction!(best_score, m)?)
 }
