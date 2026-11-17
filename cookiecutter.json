@@ -16,7 +16,7 @@
     "github_setup": ["None", "private", "internal", "public"],
     "release_ci": ["None", "binaries", "crates.io", "pypi"],
     "coding_agent": ["None", "Claude", "Codex"],
-    "_copy_without_render": [".github/workflows/release-*.yml", "data/.claude/skills"],
+    "_copy_without_render": [".github/workflows/release-*.yml", "data/skills"],
     "__prompts__": {
         "project_name": "Project name",
         "crate_name": "Crate name",

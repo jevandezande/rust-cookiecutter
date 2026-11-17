@@ -35,12 +35,10 @@ and ran them over the tree, so the environment needs no verification.
 5. {AGENT: Delete this checklist and the "Understanding {AGENT: ...} directives" section}
 
 {% if cookiecutter.coding_agent != 'None' -%}
-{%- set skills = '.agents/skills' if cookiecutter.coding_agent == 'Codex' else '.claude/skills' -%}
 
 ## AI Skills
 
-This project ships agent skills in `{{ skills }}/`. Load the relevant one before working;
-do not change code without consulting it.
+Read the relevant `SKILL.md` files in `.agents/skills/` before making changes.
 
 | Skill | Use when |
 | --- | --- |
@@ -171,7 +169,7 @@ tasks rather than dropping `UV_LOCKED` by hand.
 - Run individual tools to find the problem
 - Ask the user to clarify ambiguous requirements
 {%- if cookiecutter.coding_agent != 'None' %}
-- Check the skills loaded with the `skill` tool
+- Check the relevant skill files in `.agents/skills/`
 {%- endif %}
 
 ## Repository overview
@@ -192,7 +190,7 @@ Structure:
 - `scripts/` - toolchain helpers (`check_msrv.py`, `bump_toolchain.py`) and their pytest tests
 {%- endif %}
 {%- if cookiecutter.coding_agent != 'None' %}
-- `{{ skills }}/` - agent skills
+- `.agents/skills/` - agent skills
 - `STATE.md` - optional per-module tracker for work using a spec
 {%- endif %}
 - `.github/workflows/` - CI configuration

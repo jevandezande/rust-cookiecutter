@@ -111,12 +111,12 @@ RELEASE_WORKFLOWS = {
 INTEROP_FRAGMENTS = {
     "readme.md.in": ("README.md", "{interop_notes}"),
     "agents.md.in": ("data/AGENTS_README.md", "{interop_notes}"),
-    "write-code.md.in": ("data/.claude/skills/write-code/SKILL.md", "{interop_rules}"),
-    "test-code.md.in": ("data/.claude/skills/test-code/SKILL.md", "{interop_rules}"),
-    "cleanup-code.md.in": ("data/.claude/skills/cleanup-code/SKILL.md", "{interop_rules}"),
-    "generate-spec.md.in": ("data/.claude/skills/generate-spec/SKILL.md", "{interop_rules}"),
-    "write-python.md.in": ("data/.claude/skills/write-python/SKILL.md", "{interop_rules}"),
-    "test-python.md.in": ("data/.claude/skills/test-python/SKILL.md", "{interop_rules}"),
+    "write-code.md.in": ("data/skills/write-code/SKILL.md", "{interop_rules}"),
+    "test-code.md.in": ("data/skills/test-code/SKILL.md", "{interop_rules}"),
+    "cleanup-code.md.in": ("data/skills/cleanup-code/SKILL.md", "{interop_rules}"),
+    "generate-spec.md.in": ("data/skills/generate-spec/SKILL.md", "{interop_rules}"),
+    "write-python.md.in": ("data/skills/write-python/SKILL.md", "{interop_rules}"),
+    "test-python.md.in": ("data/skills/test-python/SKILL.md", "{interop_rules}"),
 }
 
 
@@ -438,13 +438,14 @@ def setup_coding_agent_files(agent: str) -> None:
     logger.info(f"Setting up files for {coding_agent.value}")
     shutil.copy(Path("data/STATE.md"), Path("STATE.md"))
 
-    # Each agent discovers skills in its own directory only
+    shutil.copytree("data/skills", ".agents/skills")
+
     match coding_agent:
         case CodingAgent.CLAUDE:
             shutil.copytree("data/.claude", ".claude")
+            Path(".claude/skills").symlink_to("../.agents/skills", target_is_directory=True)
             cmd = "claude -p 'Read AGENTS.md and update it'"
         case CodingAgent.CODEX:
-            shutil.copytree("data/.claude/skills", ".agents/skills")
             cmd = "codex exec 'Read AGENTS.md and update it'"
         case _:
             assert_never(coding_agent)

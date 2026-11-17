@@ -360,7 +360,10 @@ def test_set_license_none_writes_proprietary(
 @pytest.fixture
 def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Create `data/` payload the coding-agent setup copies from, and chdir into its parent."""
-    (tmp_path / "data" / ".claude" / "skills").mkdir(parents=True)
+    skill = tmp_path / "data/skills/write-code/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("skill\n", encoding="utf-8")
+    (tmp_path / "data" / ".claude").mkdir()
     (tmp_path / "data" / ".claude" / "settings.json").write_text("{}", encoding="utf-8")
     (tmp_path / "data" / "AGENTS_README.md").write_text("agent notes", encoding="utf-8")
     (tmp_path / "data" / "STATE.md").write_text("progress tracker", encoding="utf-8")
@@ -369,30 +372,34 @@ def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-@pytest.mark.parametrize(
-    ("agent", "skills", "other_skills", "settings"),
-    [
-        ("Claude", ".claude/skills", ".agents/skills", True),
-        ("Codex", ".agents/skills", ".claude/skills", False),
-    ],
-)
-def test_setup_coding_agent_files_writes_the_agents_own_file(
-    agent_data: Path, agent: str, skills: str, other_skills: str, settings: bool
+@pytest.mark.parametrize(("agent", "settings"), [("Claude", True), ("Codex", False)])
+def test_setup_coding_agent_files_uses_shared_skills(
+    agent_data: Path, agent: str, settings: bool
 ) -> None:
-    """Always write AGENTS.md, which every agent reads; only Claude gets settings.json.
-
-    Skills go where the agent discovers them: Claude Code reads `.claude/skills/` and Codex
-    `.agents/skills/`, neither the other's. `STATE.md` goes with them, since the spec skills read
-    and update it; `settings.json` is Claude's settings and hooks.
-    """
+    """Skills share one directory; only Claude gets settings and a discovery symlink."""
     post_gen_project.setup_coding_agent_files(agent)
 
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
     assert not (agent_data / "CLAUDE.md").exists()
-    assert (agent_data / skills).is_dir()
-    assert not (agent_data / other_skills).exists()
-    assert (agent_data / ".claude" / "settings.json").exists() is settings
+    skill = agent_data / ".agents/skills/write-code/SKILL.md"
+    assert skill.read_text(encoding="utf-8") == "skill\n"
+    assert (agent_data / ".claude").exists() is settings
+    assert (agent_data / ".claude/skills").is_symlink() is settings
+    assert (agent_data / ".claude/settings.json").exists() is settings
     assert (agent_data / "STATE.md").read_text(encoding="utf-8") == "progress tracker"
+
+
+def test_claude_skills_link_survives_project_move(
+    agent_data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Claude's skills link reaches the shared files after the project moves."""
+    post_gen_project.setup_coding_agent_files("Claude")
+
+    monkeypatch.chdir(agent_data.parent)
+    moved = agent_data.rename(agent_data.with_name(f"{agent_data.name}-moved"))
+    link = moved / ".claude/skills"
+    assert link.resolve() == (moved / ".agents/skills").resolve()
+    assert (link / "write-code/SKILL.md").read_text(encoding="utf-8") == "skill\n"
 
 
 def test_setup_coding_agent_files_none_still_writes_agents_md(agent_data: Path) -> None:
@@ -660,7 +667,7 @@ def test_add_python_dependencies_skips_empty_spec(monkeypatch: pytest.MonkeyPatc
 
 
 # What `_copy_without_render` ships verbatim; everything else goes through Jinja
-VERBATIM = ("data/.claude/skills", ".github/workflows/release-")
+VERBATIM = ("data/skills", ".github/workflows/release-")
 
 # Options that select Jinja branches; rest render the same for every value
 OPTION_COMBINATIONS = list(
