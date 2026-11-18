@@ -6,11 +6,11 @@ changing code or committing.
 Keep it current: when you add a top-level directory, a mise task, or a configuration file, update
 the matching section in the same change.
 
-{% if cookiecutter.coding_agent != 'None' -%}
-
 ## AI Skills
 
-Read the relevant `SKILL.md` files in `.agents/skills/` before making changes.
+This project ships agent skills in `.agents/skills/`, where Codex reads them. Claude Code reads
+`.claude/skills/`, a symlink to `.agents/skills/`; edit skills through `.agents/skills/`. Load the
+relevant one before working; do not change code without consulting it.
 
 | Skill | Use when |
 | --- | --- |
@@ -52,8 +52,6 @@ Optional artifacts for work that uses the spec workflow:
 `STATE.md` ships as a scaffold with no modules listed yet. `docs/methods/` and `specs/` do not
 exist; create each when its first document is useful. Data and plumbing modules need a spec only
 when their behavior or interfaces require one.
-
-{% endif -%}
 
 ## Build & check commands
 
@@ -109,10 +107,8 @@ mise run all                # check + test + py-test
 Direct `cargo` invocations work anywhere; rustup reads `rust-toolchain.toml` on its own.
 
 `mise run all` is the full local gate and mirrors CI. Run it before pushing.
-{%- if cookiecutter.coding_agent != 'None' %}
 Long-running commands (builds, test suites, benchmarks) should go through the `async-workflows`
 skill so a turn does not time out.
-{%- endif %}
 
 ### Lockfile discipline
 
@@ -139,9 +135,7 @@ tasks rather than dropping `UV_LOCKED` by hand.
 
 - Run individual tools to find the problem
 - Ask the user to clarify ambiguous requirements
-{%- if cookiecutter.coding_agent != 'None' %}
 - Check the relevant skill files in `.agents/skills/`
-{%- endif %}
 
 ## Repository overview
 
@@ -160,10 +154,9 @@ Structure:
 {%- else %}
 - `scripts/` - toolchain helpers (`check_msrv.py`, `bump_toolchain.py`) and their pytest tests
 {%- endif %}
-{%- if cookiecutter.coding_agent != 'None' %}
 - `.agents/skills/` - agent skills
+- `.claude/` - Claude Code settings and hooks; `.claude/skills/` is a symlink to `.agents/skills/`
 - `STATE.md` - optional per-module tracker for work using a spec
-{%- endif %}
 - `.github/workflows/` - CI configuration
 
 {% if cookiecutter.python_interop == 'extension' -%}
@@ -214,8 +207,6 @@ Python is linted by ruff (bugbear, pydocstyle in Google convention, pylint, pyte
 more; see `[tool.ruff.lint]` in `pyproject.toml`) at a 100-column line length, and type-checked by
 ty. Markdown is checked by rumdl with line length disabled.
 
-{% if cookiecutter.coding_agent == 'Claude' -%}
-
 ## Claude Code integration
 
 ### Auto-formatting hooks
@@ -234,8 +225,6 @@ To change the shared hooks, or to pre-approve permissions for this project, edit
 1. File edits are formatted automatically; no manual `mise run fmt` needed
 2. Pre-commit checks still run on commit, and the test suite on push
 3. `includeCoAuthoredBy` is off, so commits carry no agent co-author trailer
-
-{% endif -%}
 
 ## Miscellaneous
 

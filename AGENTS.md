@@ -17,8 +17,10 @@ template body follows.
   - `crates/` - shared by every mode: `core` always; `cli` unless `crate_type=lib`
   - `data/` - post-gen hook staging data (deleted in produced template)
   - `data/interop/<mode>/` - files `set_interop()` copies over the project root
-  - `data/STATE.md` - progress-tracker scaffold, copied to the root only when an agent is set up
-  - `data/skills/` - skills copied to `.agents/skills/`; Claude gets a `.claude/skills` symlink
+  - `data/STATE.md` - progress-tracker scaffold, copied to the root
+  - `data/skills/` - skills, copied to `.agents/skills/` for Codex; `.claude/skills/` is a symlink
+    to it for Claude Code, since each agent reads only its own directory
+  - `data/.claude/settings.json` - Claude Code settings and hooks, copied to `.claude/`
   - `scripts/` - `check_msrv.py` and `bump_toolchain.py`
 - `hooks/` - cookiecutter hooks and their tests
 - `.github/workflows/` - CI that generates projects and runs checks

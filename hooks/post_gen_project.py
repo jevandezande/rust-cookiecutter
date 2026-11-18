@@ -28,6 +28,8 @@ DEFAULT_BRANCH = "master"
 
 PROPRIETARY = "Proprietary"
 
+AGENT_SKILLS = Path(".agents/skills")
+
 BUNDLE_SCRIPTS = (
     "scripts/bundle.py",
     "scripts/test_bundle.py",
@@ -65,14 +67,6 @@ class CrateType(StrEnum):
     BOTH = "both"
 
 
-class CodingAgent(StrEnum):
-    """Coding agents supported, as lowercased `cookiecutter.json` choices."""
-
-    NONE = "none"
-    CLAUDE = "claude"
-    CODEX = "codex"
-
-
 class Interop(StrEnum):
     """Which way Rust and Python call each other, or `NONE` for neither."""
 
@@ -107,7 +101,7 @@ RELEASE_WORKFLOWS = {
 
 # Prose that differs per interop mode: fragment file under data/interop/<mode>/fragments/ ->
 # file it is substituted into and placeholder it fills. Targets under `data/` are sources
-# `setup_coding_agent_files` copies out later, long after `set_interop` has run
+# `setup_agent_files` copies out later, long after `set_interop` has run
 INTEROP_FRAGMENTS = {
     "readme.md.in": ("README.md", "{interop_notes}"),
     "agents.md.in": ("data/AGENTS.md", "{interop_notes}"),
@@ -420,34 +414,19 @@ def lock_dev_tools() -> None:
     call(f"mise lock --platform {LOCK_PLATFORMS}")
 
 
-def setup_coding_agent_files(agent: str) -> None:
-    """Write selected agent's files; AGENTS.md ships even when none was chosen.
+def setup_agent_files() -> None:
+    """Write AGENTS.md, STATE.md, and skills where Codex and Claude Code each discover them.
 
-    Args:
-        agent: coding agent name ("claude", "codex", or "none")
-
-    Raises:
-        ValueError: agent not supported
+    Codex reads skills from `.agents/skills/` and Claude Code from `.claude/skills/`, neither the
+    other's. Claude's directory is a symlink, so one copy of the skills serves both.
     """
-    coding_agent = CodingAgent(agent.lower())
     shutil.copy(Path("data/AGENTS.md"), Path("AGENTS.md"))
-
-    if coding_agent is CodingAgent.NONE:
-        return
-
-    logger.info(f"Setting up files for {coding_agent.value}")
     shutil.copy(Path("data/STATE.md"), Path("STATE.md"))
+    shutil.copytree("data/skills", AGENT_SKILLS)
 
-    shutil.copytree("data/skills", ".agents/skills")
-
-    match coding_agent:
-        case CodingAgent.CLAUDE:
-            shutil.copytree("data/.claude", ".claude")
-            Path(".claude/skills").symlink_to("../.agents/skills", target_is_directory=True)
-        case CodingAgent.CODEX:
-            pass
-        case _:
-            assert_never(coding_agent)
+    Path(".claude").mkdir()
+    shutil.copy(Path("data/.claude/settings.json"), Path(".claude/settings.json"))
+    Path(".claude/skills").symlink_to(Path("..") / AGENT_SKILLS, target_is_directory=True)
 
 
 def format_sources() -> None:
@@ -593,7 +572,7 @@ def main() -> None:
     lock_dev_tools()
 
     call("uv run prek install")
-    setup_coding_agent_files("{{cookiecutter.coding_agent}}")
+    setup_agent_files()
     shutil.rmtree("data")
 
     format_sources()

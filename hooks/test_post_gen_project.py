@@ -288,8 +288,6 @@ def test_set_license_copies_and_formats(tmp_path: Path, monkeypatch: pytest.Monk
         ("crate_type", post_gen_project.CrateType, str),
         ("python_interop", post_gen_project.Interop, str),
         ("release_ci", post_gen_project.ReleaseCi, str),
-        # `setup_coding_agent_files` lowercases before constructing the enum
-        ("coding_agent", post_gen_project.CodingAgent, str.lower),
     ],
 )
 def test_every_option_choice_has_an_enum_member(
@@ -359,10 +357,10 @@ def test_set_license_none_writes_proprietary(
 
 @pytest.fixture
 def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Create `data/` payload the coding-agent setup copies from, and chdir into its parent."""
-    skill = tmp_path / "data/skills/write-code/SKILL.md"
-    skill.parent.mkdir(parents=True)
-    skill.write_text("skill\n", encoding="utf-8")
+    """Create `data/` payload the agent setup copies from, and chdir into its parent."""
+    skill = tmp_path / "data" / "skills" / "write-code"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("write idiomatic Rust", encoding="utf-8")
     (tmp_path / "data" / ".claude").mkdir()
     (tmp_path / "data" / ".claude" / "settings.json").write_text("{}", encoding="utf-8")
     (tmp_path / "data" / "AGENTS.md").write_text("agent notes", encoding="utf-8")
@@ -372,53 +370,35 @@ def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-@pytest.mark.parametrize(("agent", "settings"), [("Claude", True), ("Codex", False)])
-def test_setup_coding_agent_files_uses_shared_skills(
-    agent_data: Path, agent: str, settings: bool
-) -> None:
-    """Skills share one directory; only Claude gets settings and a discovery symlink."""
-    post_gen_project.setup_coding_agent_files(agent)
+def test_setup_agent_files_serves_claude_and_codex(agent_data: Path) -> None:
+    """Write skills to `.agents/skills/` and make `.claude/skills/` a symlink to it.
 
+    Codex reads `.agents/skills/` and Claude Code `.claude/skills/`, neither the other's; both
+    read AGENTS.md, so no CLAUDE.md, which would stop Claude Code reading AGENTS.md.
+    """
+    post_gen_project.setup_agent_files()
+
+    link = agent_data / ".claude" / "skills"
+    assert link.is_symlink()
+    assert link.resolve() == (agent_data / ".agents" / "skills").resolve()
+    assert (link / "write-code" / "SKILL.md").read_text(encoding="utf-8") == "write idiomatic Rust"
+    assert (agent_data / ".claude" / "settings.json").exists()
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
-    assert not (agent_data / "CLAUDE.md").exists()
-    skill = agent_data / ".agents/skills/write-code/SKILL.md"
-    assert skill.read_text(encoding="utf-8") == "skill\n"
-    assert (agent_data / ".claude").exists() is settings
-    assert (agent_data / ".claude/skills").is_symlink() is settings
-    assert (agent_data / ".claude/settings.json").exists() is settings
     assert (agent_data / "STATE.md").read_text(encoding="utf-8") == "progress tracker"
+    assert not (agent_data / "CLAUDE.md").exists()
 
 
 def test_claude_skills_link_survives_project_move(
     agent_data: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Claude's skills link reaches the shared files after the project moves."""
-    post_gen_project.setup_coding_agent_files("Claude")
+    post_gen_project.setup_agent_files()
 
     monkeypatch.chdir(agent_data.parent)
     moved = agent_data.rename(agent_data.with_name(f"{agent_data.name}-moved"))
     link = moved / ".claude/skills"
     assert link.resolve() == (moved / ".agents/skills").resolve()
-    assert (link / "write-code/SKILL.md").read_text(encoding="utf-8") == "skill\n"
-
-
-def test_setup_coding_agent_files_none_still_writes_agents_md(agent_data: Path) -> None:
-    """Ship AGENTS.md even when no agent is selected, so embedding rules land."""
-    post_gen_project.setup_coding_agent_files("None")
-
-    assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
-    assert not (agent_data / ".claude").exists()
-    assert not (agent_data / ".agents").exists()
-    assert not (agent_data / "CLAUDE.md").exists()
-    assert not (agent_data / "STATE.md").exists()
-
-
-def test_setup_coding_agent_files_rejects_unknown(agent_data: Path) -> None:
-    """Raise on an agent outside supported set, before anything is copied."""
-    with pytest.raises(ValueError, match="cursor"):
-        post_gen_project.setup_coding_agent_files("cursor")
-
-    assert not (agent_data / ".claude").exists()
+    assert (link / "write-code/SKILL.md").read_text(encoding="utf-8") == "write idiomatic Rust"
 
 
 @pytest.mark.parametrize(
@@ -756,7 +736,6 @@ def test_template_renders_to_well_formed_files(
                 pass
 
 
-@pytest.mark.parametrize("coding_agent", ["None", "Claude", "Codex"])
 @pytest.mark.parametrize(
     ("description", "purpose"),
     [
@@ -764,15 +743,13 @@ def test_template_renders_to_well_formed_files(
         ("", "Purpose: not yet written; ask the user and record it here\n"),
     ],
 )
-def test_agents_md_renders_without_directives(
-    coding_agent: str, description: str, purpose: str
-) -> None:
+def test_agents_md_renders_without_directives(description: str, purpose: str) -> None:
     """Render AGENTS.md complete, with purpose from `description` and no `{AGENT: ...}` left.
 
     Generation commits AGENTS.md as rendered and every agent session reads it; a directive would
     have whichever agent opens the repo first rewrite the file in the middle of another task.
     """
-    context = cookiecutter_context(coding_agent=coding_agent, description=description)
+    context = cookiecutter_context(description=description)
     template = Environment().from_string((TEMPLATE / "data" / "AGENTS.md").read_text("utf-8"))
 
     text = template.render(cookiecutter=context)

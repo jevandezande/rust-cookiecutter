@@ -15,7 +15,6 @@
     "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "None"],
     "github_setup": ["None", "private", "internal", "public"],
     "release_ci": ["None", "binaries", "crates.io", "pypi"],
-    "coding_agent": ["None", "Claude", "Codex"],
     "_copy_without_render": [".github/workflows/release-*.yml", "data/skills"],
     "__prompts__": {
         "project_name": "Project name",
@@ -32,7 +31,6 @@
         "python_dependencies": "Python dependencies (e.g. numpy scipy)",
         "license": "License",
         "github_setup": "Create the GitHub repository (private, internal, public, or None)",
-        "release_ci": "Release workflow (binaries on tag, crates.io publish, pypi wheels, or None)",
-        "coding_agent": "Coding agent to set up (Claude, Codex, or None)"
+        "release_ci": "Release workflow (binaries on tag, crates.io publish, pypi wheels, or None)"
     }
 }

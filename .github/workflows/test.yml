@@ -54,14 +54,12 @@ jobs:
             python_interop: embedded
             license: None
             release_ci: None
-            coding_agent: None
           - name: both, binaries
             os: ubuntu-latest
             crate_type: both
             python_interop: embedded
             license: MIT
             release_ci: binaries
-            coding_agent: Claude
           # The only leg with dependencies: cargo add, uv add, cargo-deny, and the metadata
           # pre-gen requires for a crates.io release
           - name: both, crates.io, with dependencies
@@ -70,7 +68,6 @@ jobs:
             python_interop: embedded
             license: Apache-2.0
             release_ci: crates.io
-            coding_agent: None
             cargo_dependencies: serde@1.0
             cargo_dev_dependencies: proptest
             python_dependencies: numpy
@@ -84,7 +81,6 @@ jobs:
             python_interop: none
             license: MIT
             release_ci: binaries
-            coding_agent: Claude
           # Python imports Rust: the extension crates/py, its fragments, and release-pypi.yml,
           # which no other interop mode is allowed to select
           - name: both, pypi, extension module
@@ -93,7 +89,6 @@ jobs:
             python_interop: extension
             license: MIT
             release_ci: pypi
-            coding_agent: Codex
           # A wheel with no CLI, the likeliest `lib` use of `extension`: `set_crate_type` leaves
           # core and py behind. Also the only leg that copies BSD-3-Clause
           - name: lib, pypi, extension module
@@ -102,7 +97,6 @@ jobs:
             python_interop: extension
             license: BSD-3-Clause
             release_ci: pypi
-            coding_agent: None
           # The extension crate builds no test harness, so this leg proves nothing in the
           # workspace needs python3.dll in reach at test time
           - name: both, pypi, extension module (Windows)
@@ -111,21 +105,18 @@ jobs:
             python_interop: extension
             license: MIT
             release_ci: pypi
-            coding_agent: None
           - name: both, binaries (Windows)
             os: windows-latest
             crate_type: both
             python_interop: embedded
             license: MIT
             release_ci: binaries
-            coding_agent: None
           - name: both, binaries (macOS)
             os: macos-latest
             crate_type: both
             python_interop: embedded
             license: MIT
             release_ci: binaries
-            coding_agent: None
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -151,7 +142,6 @@ jobs:
             python_interop=${{ matrix.python_interop }} \
             license=${{ matrix.license }} \
             release_ci=${{ matrix.release_ci }} \
-            coding_agent=${{ matrix.coding_agent }} \
             cargo_dependencies="${{ matrix.cargo_dependencies }}" \
             cargo_dev_dependencies="${{ matrix.cargo_dev_dependencies }}" \
             python_dependencies="${{ matrix.python_dependencies }}" \
