@@ -365,7 +365,7 @@ def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     skill.write_text("skill\n", encoding="utf-8")
     (tmp_path / "data" / ".claude").mkdir()
     (tmp_path / "data" / ".claude" / "settings.json").write_text("{}", encoding="utf-8")
-    (tmp_path / "data" / "AGENTS_README.md").write_text("agent notes", encoding="utf-8")
+    (tmp_path / "data" / "AGENTS.md").write_text("agent notes", encoding="utf-8")
     (tmp_path / "data" / "STATE.md").write_text("progress tracker", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
@@ -754,3 +754,28 @@ def test_template_renders_to_well_formed_files(
                 ast.parse(text, filename=name)
             case _:
                 pass
+
+
+@pytest.mark.parametrize("coding_agent", ["None", "Claude", "Codex"])
+@pytest.mark.parametrize(
+    ("description", "purpose"),
+    [
+        ("Scores things, quickly", "Purpose: Scores things, quickly\n"),
+        ("", "Purpose: not yet written; ask the user and record it here\n"),
+    ],
+)
+def test_agents_md_renders_without_directives(
+    coding_agent: str, description: str, purpose: str
+) -> None:
+    """Render AGENTS.md complete, with purpose from `description` and no `{AGENT: ...}` left.
+
+    Generation commits AGENTS.md as rendered and every agent session reads it; a directive would
+    have whichever agent opens the repo first rewrite the file in the middle of another task.
+    """
+    context = cookiecutter_context(coding_agent=coding_agent, description=description)
+    template = Environment().from_string((TEMPLATE / "data" / "AGENTS.md").read_text("utf-8"))
+
+    text = template.render(cookiecutter=context)
+
+    assert purpose in text
+    assert "{AGENT" not in text

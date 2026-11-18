@@ -110,7 +110,7 @@ RELEASE_WORKFLOWS = {
 # `setup_coding_agent_files` copies out later, long after `set_interop` has run
 INTEROP_FRAGMENTS = {
     "readme.md.in": ("README.md", "{interop_notes}"),
-    "agents.md.in": ("data/AGENTS_README.md", "{interop_notes}"),
+    "agents.md.in": ("data/AGENTS.md", "{interop_notes}"),
     "write-code.md.in": ("data/skills/write-code/SKILL.md", "{interop_rules}"),
     "test-code.md.in": ("data/skills/test-code/SKILL.md", "{interop_rules}"),
     "cleanup-code.md.in": ("data/skills/cleanup-code/SKILL.md", "{interop_rules}"),
@@ -430,7 +430,7 @@ def setup_coding_agent_files(agent: str) -> None:
         ValueError: agent not supported
     """
     coding_agent = CodingAgent(agent.lower())
-    shutil.copy(Path("data/AGENTS_README.md"), Path("AGENTS.md"))
+    shutil.copy(Path("data/AGENTS.md"), Path("AGENTS.md"))
 
     if coding_agent is CodingAgent.NONE:
         return
@@ -444,13 +444,10 @@ def setup_coding_agent_files(agent: str) -> None:
         case CodingAgent.CLAUDE:
             shutil.copytree("data/.claude", ".claude")
             Path(".claude/skills").symlink_to("../.agents/skills", target_is_directory=True)
-            cmd = "claude -p 'Read AGENTS.md and update it'"
         case CodingAgent.CODEX:
-            cmd = "codex exec 'Read AGENTS.md and update it'"
+            pass
         case _:
             assert_never(coding_agent)
-
-    logger.info(f"Run `{cmd}` to finish agent setup.")
 
 
 def format_sources() -> None:

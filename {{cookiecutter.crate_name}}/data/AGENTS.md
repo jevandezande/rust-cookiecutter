@@ -1,38 +1,10 @@
 # AI Agent Development Guide
 
-This file is agent onboarding, not finished project documentation. A coding agent rewrites the
-`{AGENT: ...}` placeholders on first use. Until then, treat the checklist as instructions for
-that agent.
+This file covers the tooling, conventions, and workflows a contributor needs. Read it before
+changing code or committing.
 
-It covers the tooling, conventions, and workflows a contributor needs.
-
-## How to use this document
-
-### When to read this file
-
-- First time working on this repository
-- Before making any code changes or commits
-- When unsure about code conventions or tooling
-
-### Understanding {AGENT: ...} directives
-
-- Directives in curly braces starting with "AGENT:" are instructions for you
-- Execute them when first reading this file
-- Replace each directive with the actual information
-- Directives marked "must" are required; others are recommended
-- A cookiecutter template generated this file and pre-filled some configuration. Treat it as the
-  start of a new project, not as a template, and ask questions where needed
-
-## Initial setup checklist
-
-Generation already created `.venv` with `uv sync`, built the workspace, installed the prek hooks,
-and ran them over the tree, so the environment needs no verification.
-
-1. {AGENT: You will update this file. Follow the directives; do not simplify or delete, only improve}
-2. {AGENT: Read README.md and establish the project purpose; ask the user only if it remains unclear}
-3. {AGENT: Read Cargo.toml, pyproject.toml, and mise.toml, and update the repository-specific information below}
-4. {AGENT: After setup, tell the user about any discrepancies found}
-5. {AGENT: Delete this checklist and the "Understanding {AGENT: ...} directives" section}
+Keep it current: when you add a top-level directory, a mise task, or a configuration file, update
+the matching section in the same change.
 
 {% if cookiecutter.coding_agent != 'None' -%}
 
@@ -68,8 +40,7 @@ Use `write-code` and `test-code` for ordinary Rust changes, and `write-python` a
 for Python. Use `port-code` when rewriting an existing program or module; compare its observable
 behavior with the original. For complex scientific methods, method documentation and a spec can
 make the requirements reviewable. Choose those steps when they answer a real design or
-correctness question. {AGENT: if this project is
-not mathematical or numerical, note that method-doc skills are unlikely to apply}
+correctness question.
 
 Optional artifacts for work that uses the spec workflow:
 
@@ -174,7 +145,7 @@ tasks rather than dropping `UV_LOCKED` by hand.
 
 ## Repository overview
 
-Purpose: {AGENT must read from README.md and confirm with user}
+Purpose: {{ cookiecutter.description or "not yet written; ask the user and record it here" }}
 
 Structure:
 
@@ -194,7 +165,6 @@ Structure:
 - `STATE.md` - optional per-module tracker for work using a spec
 {%- endif %}
 - `.github/workflows/` - CI configuration
-- {AGENT: list other important folders from the repository; ask if their purpose is unclear}
 
 {% if cookiecutter.python_interop == 'extension' -%}
 `crates/*/tests/` belongs to cargo; the top-level `tests/` and `scripts/test_*.py` belong to
