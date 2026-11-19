@@ -60,49 +60,17 @@ All tasks run through [mise](https://mise.jdx.dev), which also provides the dev 
 `python` directly, with no `uv run` prefix.
 
 ```sh
-mise tasks                  # list every task
-mise run build              # cargo build --workspace
-mise run test               # cargo test --workspace, then each bench once, untimed
-mise run fmt                # cargo fmt --all
-mise run fmt-check          # cargo fmt --all --check
-mise run clippy             # cargo clippy --workspace --all-targets -- -D warnings
-mise run clippy-fix         # clippy with --fix
-mise run docs               # cargo doc --workspace --no-deps, warnings as errors
-mise run msrv               # check the workspace against the MSRV in Cargo.toml
-mise run bump-toolchain     # re-pin rust-toolchain.toml to current stable, moving the MSRV with it
-mise run lint               # fmt + clippy
-mise run bench              # criterion benchmarks
-mise run profile-build      # release build with debug symbols, for perf/samply
-mise run coverage           # cargo-llvm-cov; HTML report in target/llvm-cov/html
-mise run coverage-summary   # coverage as a table on stdout
-mise run lock-check         # uv lock --check
-mise run lock               # re-resolve uv.lock after editing dependencies
-mise run lock-upgrade       # bump uv.lock to the newest compatible versions
-{% if cookiecutter.crate_type != 'lib' and cookiecutter.python_interop == 'embedded' -%}
-mise run bundle             # self-contained bundle in dist/: the binary plus its interpreter
-mise run smoke-bundle       # prove the bundle ignores an ambient VIRTUAL_ENV
-{% endif -%}
-{% if cookiecutter.python_interop == 'extension' -%}
-mise run develop            # maturin develop --uv; build the extension module into .venv
-mise run wheel              # maturin build --release --out dist
-{% endif -%}
-mise run py-fmt             # ruff format
-mise run py-fmt-check       # ruff format --check
-mise run py-lint            # ruff check
-mise run py-types           # ty check
-{% if cookiecutter.python_interop == 'extension' -%}
-mise run py-test            # pytest (depends on develop)
-{% else -%}
-mise run py-test            # pytest
-{% endif -%}
-mise run md-fmt             # rumdl fmt .
-mise run md-fmt-check       # rumdl fmt --check .
-mise run md-check           # rumdl check .
-mise run deny               # cargo-deny; the binary comes from mise.toml
 mise run fix                # rewrite what can be fixed automatically
 mise run check              # reports only: lock-check + lint + python + markdown + docs
+mise run test               # cargo test --workspace, then each bench once, untimed
 mise run all                # check + test + py-test
+mise run lock               # re-resolve uv.lock after editing dependencies
+mise run bench              # criterion benchmarks
+mise run coverage           # cargo-llvm-cov; HTML report in target/llvm-cov/html
+mise run bump-toolchain     # re-pin rust-toolchain.toml to current stable, moving the MSRV with it
 ```
+
+`mise tasks` lists the rest, and `mise.toml` defines them.
 
 Direct `cargo` invocations work anywhere; rustup reads `rust-toolchain.toml` on its own.
 
@@ -156,6 +124,7 @@ Structure:
 {%- endif %}
 - `.agents/skills/` - agent skills
 - `.claude/` - Claude Code settings and hooks; `.claude/skills/` is a symlink to `.agents/skills/`
+- `.codex/` - Codex hooks
 - `STATE.md` - optional per-module tracker for work using a spec
 - `.github/workflows/` - CI configuration
 
@@ -207,24 +176,18 @@ Python is linted by ruff (bugbear, pydocstyle in Google convention, pylint, pyte
 more; see `[tool.ruff.lint]` in `pyproject.toml`) at a 100-column line length, and type-checked by
 ty. Markdown is checked by rumdl with line length disabled.
 
-## Claude Code integration
+## Agent hooks
 
-### Auto-formatting hooks
+Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`) each run `cargo fmt` and
+`ruff format` after every file edit, so edits need no manual `mise run fmt`. Keep the two hooks
+identical. Codex runs a project hook only once the project is trusted and the hook approved in
+`/hooks`.
 
-A PostToolUse hook runs `cargo fmt` and `ruff format` after every Edit or Write, so edits are
-formatted automatically.
+Clippy and ty are too slow for every edit. They run on commit through prek, and the test suite on
+push and in CI.
 
-Clippy and ty are not in that hook, since they are too slow to run on every edit. They run on
-commit through prek and in CI.
-
-To change the shared hooks, or to pre-approve permissions for this project, edit
-`.claude/settings.json`. Machine-local overrides go in `.claude/settings.local.json` (gitignored).
-
-### Workflow impact
-
-1. File edits are formatted automatically; no manual `mise run fmt` needed
-2. Pre-commit checks still run on commit, and the test suite on push
-3. `includeCoAuthoredBy` is off, so commits carry no agent co-author trailer
+Claude Code's `attribution` setting is empty, so its commits and PRs carry no agent trailer.
+Machine-local Claude Code overrides go in `.claude/settings.local.json` (gitignored).
 
 ## Miscellaneous
 

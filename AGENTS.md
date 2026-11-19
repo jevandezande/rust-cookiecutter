@@ -6,10 +6,9 @@ Generated projects are Rust crates with optional Python bindings and distributio
 ## Skills
 
 Read the relevant `SKILL.md` files in `.agents/skills/` before editing.
-Ignore `{{cookiecutter.crate_name}}/data/skills/`:
-those are Rust skills that ship into generated projects. The exception is when editing the
-template's own Rust - `write-code` and `write-doc-comments` there describe the conventions the
-template body follows.
+`{{cookiecutter.crate_name}}/data/.agents/skills/` holds the Rust skills that ship into generated
+projects; neither agent loads them here. Read `write-code` and `write-doc-comments` there when
+editing the template's own Rust: they describe the conventions the template body follows.
 
 ## Layout
 
@@ -18,9 +17,10 @@ template body follows.
   - `data/` - post-gen hook staging data (deleted in produced template)
   - `data/interop/<mode>/` - files `set_interop()` copies over the project root
   - `data/STATE.md` - progress-tracker scaffold, copied to the root
-  - `data/skills/` - skills, copied to `.agents/skills/` for Codex; `.claude/skills/` is a symlink
-    to it for Claude Code, since each agent reads only its own directory
+  - `data/.agents/skills/` - skills, copied to `.agents/skills/` for Codex; `.claude/skills/` is a
+    symlink to it for Claude Code, since each agent reads only its own directory
   - `data/.claude/settings.json` - Claude Code settings and hooks, copied to `.claude/`
+  - `data/.codex/hooks.json` - Codex hooks, copied to `.codex/`; same `hooks` as Claude's
   - `scripts/` - `check_msrv.py` and `bump_toolchain.py`
 - `hooks/` - cookiecutter hooks and their tests
 - `.github/workflows/` - CI that generates projects and runs checks
@@ -38,11 +38,12 @@ at all.
 the defaults of `add_dependencies`/`add_python_dependencies`. Functions that need a cookiecutter
 value take it as a parameter so tests can pass their own.
 
-`_copy_without_render` covers `.github/workflows/release-*.yml` and `data/skills`, because
+`_copy_without_render` covers `.github/workflows/release-*.yml` and `data/.agents/skills`, because
 GitHub Actions `${{ ... }}` collides with Jinja. A release workflow cannot branch on an option:
 `set_release_ci` copies one file and deletes the rest. `test.yml` is outside that glob so it can
-branch on `python_interop`; wrap every `${{ ... }}` in `{% raw %}`. `data/.claude/settings.json` is
-rendered: a literal `{{ ... }}` in it breaks generation.
+branch on `python_interop`; wrap every `${{ ... }}` in `{% raw %}`.
+`data/.claude/settings.json` and `data/.codex/hooks.json` are rendered: a literal `{{ ... }}` in
+either breaks generation.
 
 `mise.toml` is rendered. Mise then applies Tera to `[env]` values, so wrap those `{{ ... }}` in
 `{% raw %}{% endraw %}`. Task `run` strings are not Tera-templated.

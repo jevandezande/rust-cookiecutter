@@ -358,11 +358,13 @@ def test_set_license_none_writes_proprietary(
 @pytest.fixture
 def agent_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Create `data/` payload the agent setup copies from, and chdir into its parent."""
-    skill = tmp_path / "data" / "skills" / "write-code"
+    skill = tmp_path / "data" / ".agents" / "skills" / "write-code"
     skill.mkdir(parents=True)
     (skill / "SKILL.md").write_text("write idiomatic Rust", encoding="utf-8")
     (tmp_path / "data" / ".claude").mkdir()
     (tmp_path / "data" / ".claude" / "settings.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "data" / ".codex").mkdir()
+    (tmp_path / "data" / ".codex" / "hooks.json").write_text("{}", encoding="utf-8")
     (tmp_path / "data" / "AGENTS.md").write_text("agent notes", encoding="utf-8")
     (tmp_path / "data" / "STATE.md").write_text("progress tracker", encoding="utf-8")
 
@@ -383,6 +385,7 @@ def test_setup_agent_files_serves_claude_and_codex(agent_data: Path) -> None:
     assert link.resolve() == (agent_data / ".agents" / "skills").resolve()
     assert (link / "write-code" / "SKILL.md").read_text(encoding="utf-8") == "write idiomatic Rust"
     assert (agent_data / ".claude" / "settings.json").exists()
+    assert (agent_data / ".codex" / "hooks.json").exists()
     assert (agent_data / "AGENTS.md").read_text(encoding="utf-8") == "agent notes"
     assert (agent_data / "STATE.md").read_text(encoding="utf-8") == "progress tracker"
     assert not (agent_data / "CLAUDE.md").exists()
@@ -399,6 +402,18 @@ def test_claude_skills_link_survives_project_move(
     link = moved / ".claude/skills"
     assert link.resolve() == (moved / ".agents/skills").resolve()
     assert (link / "write-code/SKILL.md").read_text(encoding="utf-8") == "write idiomatic Rust"
+
+
+def test_claude_and_codex_run_the_same_edit_hooks() -> None:
+    """Format after an edit the same way whichever agent made it.
+
+    Both agents read the same `hooks` shape, and both match file edits with `Edit|Write`.
+    """
+    data = TEMPLATE / "data"
+    claude = json.loads((data / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    codex = json.loads((data / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+
+    assert claude["hooks"] == codex["hooks"]
 
 
 @pytest.mark.parametrize(
@@ -647,7 +662,7 @@ def test_add_python_dependencies_skips_empty_spec(monkeypatch: pytest.MonkeyPatc
 
 
 # What `_copy_without_render` ships verbatim; everything else goes through Jinja
-VERBATIM = ("data/skills", ".github/workflows/release-")
+VERBATIM = ("data/.agents/skills", ".github/workflows/release-")
 
 # Options that select Jinja branches; rest render the same for every value
 OPTION_COMBINATIONS = list(

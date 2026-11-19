@@ -105,12 +105,12 @@ RELEASE_WORKFLOWS = {
 INTEROP_FRAGMENTS = {
     "readme.md.in": ("README.md", "{interop_notes}"),
     "agents.md.in": ("data/AGENTS.md", "{interop_notes}"),
-    "write-code.md.in": ("data/skills/write-code/SKILL.md", "{interop_rules}"),
-    "test-code.md.in": ("data/skills/test-code/SKILL.md", "{interop_rules}"),
-    "cleanup-code.md.in": ("data/skills/cleanup-code/SKILL.md", "{interop_rules}"),
-    "generate-spec.md.in": ("data/skills/generate-spec/SKILL.md", "{interop_rules}"),
-    "write-python.md.in": ("data/skills/write-python/SKILL.md", "{interop_rules}"),
-    "test-python.md.in": ("data/skills/test-python/SKILL.md", "{interop_rules}"),
+    "write-code.md.in": ("data/.agents/skills/write-code/SKILL.md", "{interop_rules}"),
+    "test-code.md.in": ("data/.agents/skills/test-code/SKILL.md", "{interop_rules}"),
+    "cleanup-code.md.in": ("data/.agents/skills/cleanup-code/SKILL.md", "{interop_rules}"),
+    "generate-spec.md.in": ("data/.agents/skills/generate-spec/SKILL.md", "{interop_rules}"),
+    "write-python.md.in": ("data/.agents/skills/write-python/SKILL.md", "{interop_rules}"),
+    "test-python.md.in": ("data/.agents/skills/test-python/SKILL.md", "{interop_rules}"),
 }
 
 
@@ -415,17 +415,17 @@ def lock_dev_tools() -> None:
 
 
 def setup_agent_files() -> None:
-    """Write AGENTS.md, STATE.md, and skills where Codex and Claude Code each discover them.
+    """Write AGENTS.md, STATE.md, skills, and hooks where Codex and Claude Code each discover them.
 
     Codex reads skills from `.agents/skills/` and Claude Code from `.claude/skills/`, neither the
-    other's. Claude's directory is a symlink, so one copy of the skills serves both.
+    other's. Claude's directory is a symlink, so one copy of the skills serves both. Each agent
+    keeps its settings and hooks in its own directory, `.codex/` and `.claude/`.
     """
     shutil.copy(Path("data/AGENTS.md"), Path("AGENTS.md"))
     shutil.copy(Path("data/STATE.md"), Path("STATE.md"))
-    shutil.copytree("data/skills", AGENT_SKILLS)
-
-    Path(".claude").mkdir()
-    shutil.copy(Path("data/.claude/settings.json"), Path(".claude/settings.json"))
+    shutil.copytree("data/.agents", ".agents")
+    shutil.copytree("data/.claude", ".claude")
+    shutil.copytree("data/.codex", ".codex")
     Path(".claude/skills").symlink_to(Path("..") / AGENT_SKILLS, target_is_directory=True)
 
 

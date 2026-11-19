@@ -43,7 +43,7 @@ A generated project has `crates/core` (pure Rust), `crates/py` (the Python bound
 - Git hooks with [prek](https://prek.j178.dev)
 - Continuous integration with [GitHub Actions](https://github.com/features/actions), and a pull request template
 - Optional release workflow (tagged binaries, crates.io publish, or PyPI wheels)
-- Coding agent setup for Claude Code and Codex: `AGENTS.md` and a full set of Rust [skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) in `.agents/skills/`, with `.claude/skills/` a symlink to it
+- Coding agent setup for Claude Code and Codex: `AGENTS.md` and a full set of Rust [skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) in `.agents/skills/`, with `.claude/skills/` a symlink to it, and a formatting hook for each agent
 
 ## Setup
 

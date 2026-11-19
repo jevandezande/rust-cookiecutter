@@ -15,7 +15,7 @@
     "license": ["MIT", "Apache-2.0", "BSD-3-Clause", "None"],
     "github_setup": ["None", "private", "internal", "public"],
     "release_ci": ["None", "binaries", "crates.io", "pypi"],
-    "_copy_without_render": [".github/workflows/release-*.yml", "data/skills"],
+    "_copy_without_render": [".github/workflows/release-*.yml", "data/.agents/skills"],
     "__prompts__": {
         "project_name": "Project name",
         "crate_name": "Crate name",
