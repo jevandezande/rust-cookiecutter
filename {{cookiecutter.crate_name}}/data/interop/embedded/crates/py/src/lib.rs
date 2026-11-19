@@ -71,14 +71,11 @@ fn configure_interpreter() -> Result<(), String> {
         && let Some(site_packages) = active_venv_site_packages()
     {
         let path = match std::env::var_os("PYTHONPATH") {
-            Some(existing) => {
-                let sep = if cfg!(windows) { ";" } else { ":" };
-                format!(
-                    "{}{sep}{}",
-                    site_packages.display(),
-                    existing.to_string_lossy()
-                )
-            }
+            Some(existing) => format!(
+                "{}:{}",
+                site_packages.display(),
+                existing.to_string_lossy()
+            ),
             None => site_packages.display().to_string(),
         };
 
@@ -146,16 +143,12 @@ fn classify_bundle(exe: &Path) -> BundleLayout {
 fn active_venv_site_packages() -> Option<PathBuf> {
     let venv = PathBuf::from(std::env::var_os("VIRTUAL_ENV")?);
 
-    let candidate = if cfg!(windows) {
-        venv.join("Lib").join("site-packages")
-    } else {
-        std::fs::read_dir(venv.join("lib"))
-            .ok()?
-            .filter_map(Result::ok)
-            .find(|entry| entry.file_name().to_string_lossy().starts_with("python"))?
-            .path()
-            .join("site-packages")
-    };
+    let candidate = std::fs::read_dir(venv.join("lib"))
+        .ok()?
+        .filter_map(Result::ok)
+        .find(|entry| entry.file_name().to_string_lossy().starts_with("python"))?
+        .path()
+        .join("site-packages");
 
     candidate.is_dir().then_some(candidate)
 }

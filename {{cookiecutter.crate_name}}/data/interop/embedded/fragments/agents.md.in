@@ -41,9 +41,6 @@ Rules that matter when editing it:
 - `mise run bundle` (CLI workspaces only) builds a self-contained `dist/` and vendors
   `[project.dependencies]` into it. If you change the layout it produces, update
   `classify_bundle()` in `crates/py/src/lib.rs` to match.
-- `stage_python_dlls()` in `crates/py/build.rs` makes `cargo test` work on Windows, which has no
-  rpath. Do not remove it; without it every embedding binary dies with `STATUS_DLL_NOT_FOUND`
-  before `main` runs.
 
 pyo3 links against whatever interpreter it discovers. `mise.toml` activates `.venv`, so inside
 `mise run` (and in any shell where mise is active) the discovered interpreter is this project's.

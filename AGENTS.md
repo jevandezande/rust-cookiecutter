@@ -118,10 +118,11 @@ Pick one of three mechanisms:
   them into `dist/python`. Under `none` that list must be empty.
 - The generated `pyproject.toml` has no `[build-system]` and sets `[tool.uv] package = false`,
   except under `extension`, where a wheel is the point.
-- `stage_python_dlls()` in `embedded`'s `crates/py/build.rs` copies `python3*.dll` beside cargo
-  binaries. It is a no-op off Windows and looks removable; it is not. Windows has no rpath.
-  `extension`'s `crates/py` sets `test = false` and `doctest = false`, so nothing there loads
-  libpython at test time and `test.yml` puts the interpreter on `PATH` under `embedded` alone.
+- Windows: `embedded` is Linux and macOS only; it relies on rpath, which Windows lacks. Its
+  generated `test.yml` and `release-binaries.yml` have no Windows runner. `none` and `extension`
+  keep Windows in generated CI and releases: `extension`'s `crates/py` sets `test = false` and
+  `doctest = false`, so nothing there loads libpython at test time. The template's own CI has
+  no Windows leg, and generation needs symlinks, so it does not run on Windows.
 
 ## Testing
 
@@ -143,9 +144,8 @@ Jinja branches and files. Match the Linux CI legs locally:
 - `lib`/BSD-3-Clause/extension/pypi (a wheel with no CLI crate, and the only leg that copies
   BSD-3-Clause)
 
-Windows and macOS exercise bundling (`both`/MIT/binaries). Windows also runs
-`both`/extension/pypi, where no test executable loads libpython. Every leg runs `mise run all`
-plus `uv run prek run -a --stage pre-push`.
+macOS exercises bundling (`both`/MIT/binaries). Every leg runs `mise run all` plus
+`uv run prek run -a --stage pre-push`.
 
 The dependencies leg also runs `mise run msrv` and `mise run deny`. It is the only one with
 external crates, so it is the only one where a dependency raising its own `rust-version` past

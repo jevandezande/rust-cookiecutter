@@ -45,8 +45,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Option coverage runs on Linux. Windows proves mise activates .venv; macOS is the
-        # bundle relocator that needs install_name_tool and ad-hoc codesign.
+        # Option coverage runs on Linux; macOS is the bundle relocator that needs
+        # install_name_tool and ad-hoc codesign.
         include:
           - name: lib, proprietary
             os: ubuntu-latest
@@ -97,20 +97,6 @@ jobs:
             python_interop: extension
             license: BSD-3-Clause
             release_ci: pypi
-          # The extension crate builds no test harness, so this leg proves nothing in the
-          # workspace needs python3.dll in reach at test time
-          - name: both, pypi, extension module (Windows)
-            os: windows-latest
-            crate_type: both
-            python_interop: extension
-            license: MIT
-            release_ci: pypi
-          - name: both, binaries (Windows)
-            os: windows-latest
-            crate_type: both
-            python_interop: embedded
-            license: MIT
-            release_ci: binaries
           - name: both, binaries (macOS)
             os: macos-latest
             crate_type: both
@@ -148,14 +134,6 @@ jobs:
             description="${{ matrix.description }}" \
             keywords="${{ matrix.keywords }}"
 
-      # Windows has no rpath, and rustdoc runs doctests from a temporary directory that build.rs
-      # does not stage, so the interpreter has to be findable on PATH
-      - name: Put libpython on PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        working-directory: ../rust-project
-        run: uv run python -c "import sys; print(sys.base_prefix)" >> "$GITHUB_PATH"
-
       - name: Check the generated project
         shell: bash
         working-directory: ../rust-project
@@ -178,7 +156,7 @@ jobs:
         working-directory: ../rust-project
         run: mise run deny
 
-      # The Linux relocator; macOS uses install_name_tool and codesign, Windows copies the DLL
+      # The Linux relocator; macOS uses install_name_tool and codesign
       - name: Install patchelf
         if: matrix.crate_type == 'both' && matrix.python_interop == 'embedded' && runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y patchelf
@@ -204,9 +182,7 @@ jobs:
             extra+=(--import numpy)
           fi
           uv run python scripts/smoke_bundle.py "${extra[@]}"
-          if [ "$RUNNER_OS" != "Windows" ]; then
-            env -i "$PWD/dist/bin/$(ls dist/bin | head -n1)"
-          fi
+          env -i "$PWD/dist/bin/$(ls dist/bin | head -n1)"
 
       # The extension analogue of Bundle + Smoke-test: build the artifact a release would
       # publish, then import it outside the project venv rather than from the source tree

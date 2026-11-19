@@ -17,22 +17,19 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
 STAGING = DIST / "_python"
-BIN_NAME = "{{crate}}" + (".exe" if sys.platform == "win32" else "")
+BIN_NAME = "{{crate}}"
 
-# Removed from the bundled interpreter, as globs relative to its root, covering both the POSIX
-# (`lib/pythonX.Y`) and Windows (`Lib`) layouts. Drop the tcl/tk entries if the Python you call
-# draws a GUI.
+# Removed from the bundled interpreter, as globs relative to its root. Drop the tcl/tk entries if
+# the Python you call draws a GUI.
 TRIM_PATTERNS = (
     # Headers and build config: for compiling extension modules, not running them
     "include",
-    "libs",
     "share",
     "BUILD",
     "lib/pkgconfig",
@@ -46,40 +43,23 @@ TRIM_PATTERNS = (
     "lib/thread*",
     "lib/libtcl*",
     "lib/libtk*",
-    "tcl",
-    "DLLs/_tkinter*",
-    "DLLs/tcl*",
-    "DLLs/tk*",
     "lib/python*/lib-dynload/_tkinter*",
     "lib/python*/tkinter",
     "lib/python*/turtle.py",
     "lib/python*/turtledemo",
-    "Lib/tkinter",
-    "Lib/turtle.py",
-    "Lib/turtledemo",
     # IDLE, help() topic data, and the package installer
     "lib/python*/idlelib",
     "lib/python*/pydoc_data",
     "lib/python*/ensurepip",
     "lib/python*/site-packages/pip*",
-    "Lib/idlelib",
-    "Lib/pydoc_data",
-    "Lib/ensurepip",
-    "Lib/site-packages/pip*",
     "bin/idle*",
     "bin/pip*",
     "bin/pydoc*",
-    "Scripts/idle*",
-    "Scripts/pip*",
 )
 
 # The interpreter executable statically links libpython (doubling the runtime); keep it only
 # if the Python you call re-launches an interpreter, as `multiprocessing` can
-TRIM_PATTERNS_EXECUTABLE = (
-    "bin/python*",
-    "python.exe",
-    "pythonw.exe",
-)
+TRIM_PATTERNS_EXECUTABLE = ("bin/python*",)
 
 
 def run(*cmd: str | Path, env: dict[str, str] | None = None, capture: bool = False) -> str:
@@ -126,9 +106,8 @@ def install_interpreter(version: str) -> Path:
     """
     run("uv", "python", "install", "--install-dir", STAGING, "--managed-python", version)
 
-    # uv leaves a shorter alias and a .temp directory beside the real install. The alias is a
-    # symlink on Unix but a junction on Windows, which pathlib does not report as a symlink, so
-    # dedupe by resolved target rather than filtering links.
+    # uv leaves a shorter alias symlink and a .temp directory beside the real install; dedupe by
+    # resolved target
     installs = {p.resolve() for p in STAGING.iterdir() if p.is_dir() and not p.name.startswith(".")}
     if len(installs) != 1:
         raise RuntimeError(
@@ -150,8 +129,7 @@ def interpreter_executable(home: Path) -> Path:
     Raises:
         FileNotFoundError: no executable found
     """
-    candidates = [home / "python.exe", *sorted(home.glob("bin/python3.*"))]
-    for candidate in candidates:
+    for candidate in sorted(home.glob("bin/python3.*")):
         if candidate.is_file():
             return candidate
     raise FileNotFoundError(f"no python executable under {home}")
@@ -218,23 +196,6 @@ def relocate_linux(binary: Path) -> None:
     if shutil.which("patchelf") is None:
         raise RuntimeError("patchelf is required to bundle on Linux")
     run("patchelf", "--set-rpath", "$ORIGIN/../python/lib", binary)
-
-
-def relocate_windows(binary: Path, home: Path) -> None:
-    """Place the Python DLL beside the executable, where Windows looks for it.
-
-    Args:
-        binary: copied executable inside dist/bin
-        home: bundled interpreter root
-
-    Raises:
-        RuntimeError: no python DLL in the bundled interpreter
-    """
-    dlls = list(home.glob("python3*.dll"))
-    if not dlls:
-        raise RuntimeError(f"no python DLL found in {home}")
-    for dll in dlls:
-        shutil.copy2(dll, binary.parent / dll.name)
 
 
 def has_requirements(export_text: str) -> bool:
@@ -383,8 +344,6 @@ def main() -> None:
             relocate_macos(binary, home)
         case "Linux":
             relocate_linux(binary)
-        case "Windows":
-            relocate_windows(binary, home)
         case other:
             raise RuntimeError(f"unsupported platform: {other}")
 

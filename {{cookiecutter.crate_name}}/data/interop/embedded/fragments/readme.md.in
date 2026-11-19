@@ -43,25 +43,6 @@ path.
 Fix: the build scripts record an rpath pointing at it{% if cookiecutter.crate_type != 'lib' %};
 `mise run bundle` rewrites that rpath to the bundled interpreter{% endif %}.
 
-Windows has no rpath. `python3XX.dll` is found only next to the executable or on `PATH`, so
-`crates/py/build.rs` copies it into `target/<profile>` and `target/<profile>/deps`, where cargo
-puts binaries and test executables.
-
-Rustdoc is the exception: it runs doctests from a temporary directory it does not stage. A
-doctest in `crates/py` needs the interpreter on `PATH`.
-
-Unix:
-
-```sh
-export PATH="$(uv run python -c 'import sys; print(sys.base_prefix)'):$PATH"
-```
-
-Windows:
-
-```powershell
-$env:PATH = "$(uv run python -c 'import sys; print(sys.base_prefix)');$env:PATH"
-```
-
 `crates/py` always links libpython. Never enable pyo3's `extension-module` feature, which omits
 the symbols a binary needs.
 {%- if cookiecutter.crate_type != 'lib' %}

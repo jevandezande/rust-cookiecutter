@@ -47,7 +47,7 @@ A generated project has `crates/core` (pure Rust), `crates/py` (the Python bound
 
 ## Setup
 
-Install `mise`, `rustup`, and `uv`.
+Generate on Linux or macOS; the post-gen hook creates a symlink. Install `mise`, `rustup`, and `uv`.
 
 ```sh
 curl https://mise.run | sh
@@ -92,7 +92,7 @@ The cookiecutter will automagically:
 | `crate_name` | kebab-case package name, defaulting to `project_name` lowercased with `-` for spaces. Names the repository, the output directory, the core crate, the `crate_name-cli` and `crate_name-python` crates, and the binary. Cargo's rule (`_` for `-`) derives the snake_case identifier that code imports; there is no prompt for it |
 | `project_url` | Repository URL, defaulting to the GitHub one built from `github_username` and `crate_name`. Written into `Cargo.toml`, and used as the `origin` remote only when `github_setup=None` (see [notes.md](notes.md#git-remote-and-github)) |
 | `crate_type` | `both` (library + CLI binary) or `lib` (library only: no `crates/cli`, and no bundle scripts under `python_interop=embedded`) |
-| `python_interop` | Which direction Rust and Python call each other. `none` (default) is pure Rust with no pyo3 and no `crates/py`. `extension` lets Python import Rust: `crates/py` is an abi3 `cdylib` that maturin builds into a wheel. `embedded` lets Rust call Python: `crates/py` links an interpreter |
+| `python_interop` | Which direction Rust and Python call each other. `none` (default) is pure Rust with no pyo3 and no `crates/py`. `extension` lets Python import Rust: `crates/py` is an abi3 `cdylib` that maturin builds into a wheel. `embedded` lets Rust call Python: `crates/py` links an interpreter; Linux and macOS only, since it relies on rpath |
 | `cargo_dependencies` | Space-separated, `cargo add` syntax (e.g. `serde@1.0 rayon`). Added to `crates/core` |
 | `cargo_dev_dependencies` | Same, added with `cargo add --dev` |
 | `python_dependencies` | Space-separated, `uv add` syntax (e.g. `numpy scipy`). Under `embedded` they land in `[project.dependencies]` for the interpreter to import, though the skeleton still calls `math.sqrt`. Under `extension` they are the wheel's runtime dependencies. Under `none` pre-gen rejects them, since nothing imports them |

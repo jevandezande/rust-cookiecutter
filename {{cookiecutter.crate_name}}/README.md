@@ -152,7 +152,7 @@ The version appears twice: in `[workspace.package]` and again in the path-depend
 {% elif cookiecutter.release_ci == 'binaries' %}
 ## Releasing
 
-Tagging `v*` {% if cookiecutter.python_interop == 'embedded' %}runs `mise run bundle`{% else %}builds the release binary{% endif %} in CI across Linux, macOS, and Windows, and
+Tagging `v*` {% if cookiecutter.python_interop == 'embedded' %}runs `mise run bundle` in CI across Linux and macOS{% else %}builds the release binary in CI across Linux, macOS, and Windows{% endif %}, and
 attaches the archives, their checksums, and build provenance to a GitHub release.
 {% elif cookiecutter.release_ci == 'pypi' %}
 ## Releasing

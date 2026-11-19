@@ -10,7 +10,6 @@ instead of the venv's `site-packages`.
 import argparse
 import os
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -26,11 +25,7 @@ def poison_site_packages(venv: Path) -> Path:
     Returns:
         Path of the `site-packages` directory
     """
-    site = (
-        venv / "Lib" / "site-packages"
-        if sys.platform == "win32"
-        else venv / "lib" / "python3" / "site-packages"
-    )
+    site = venv / "lib" / "python3" / "site-packages"
     site.mkdir(parents=True)
     (site / "math.py").write_text("raise RuntimeError('venv leaked')\n", encoding="utf-8")
     return site
