@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mise run fmt && mise run py-fmt",
-            "statusMessage": "Formatting with cargo fmt and ruff"
+            "command": "mise run fmt && mise run py-fmt && mise run py-lint -- --fix",
+            "statusMessage": "Formatting with cargo fmt and ruff, linting with ruff"
           }
         ]
       }

@@ -7,7 +7,7 @@ which Rust tests cannot reach: conversion, exceptions, and releasing the interpr
 
 import threading
 
-import pytest
+from pytest import raises
 from {{pkg}} import ScoreError, best_score
 
 
@@ -28,7 +28,7 @@ def test_an_int_is_accepted() -> None:
 
 def test_rejects_a_negative_value() -> None:
     """A Rust error surfaces as this module's own exception type, not a panic."""
-    with pytest.raises(ScoreError, match="cannot score a negative value: -1"):
+    with raises(ScoreError, match="cannot score a negative value: -1"):
         best_score([-1.0])
 
 

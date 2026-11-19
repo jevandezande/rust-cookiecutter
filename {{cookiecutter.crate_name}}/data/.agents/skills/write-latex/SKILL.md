@@ -1,10 +1,7 @@
 ---
 name: write-latex
-description: >
-  Standards for writing LaTeX math in markdown files. Use when writing or editing
-  equations, mathematical notation, or scientific formulas in .md files. Covers
-  unicode vs LaTeX conventions, markdown-safe escaping, and display math formatting.
-argument-hint: [file path or topic]
+description: Writes LaTeX math in markdown files, covering unicode vs LaTeX, markdown-safe escaping, and display math. Use when writing or editing equations, mathematical notation, or scientific formulas in .md files.
+argument-hint: "[file path or topic]"
 ---
 
 # Writing LaTeX in Markdown

@@ -1,7 +1,7 @@
 ---
 name: port-code
-description: Rewrite an existing program or module in Rust while preserving agreed behavior and choosing an idiomatic architecture.
-argument-hint: <source-path-or-feature>
+description: Rewrites an existing program or module in Rust, preserving agreed behavior and choosing an idiomatic architecture. Use when porting code to Rust.
+argument-hint: "<source-path-or-feature>"
 allowed-tools:
   - Read
   - Glob

@@ -1,7 +1,7 @@
 ---
 name: test-python
-description: Write or review pytest tests in this workspace. Use when writing new Python tests, reviewing them, or adding coverage.
-argument-hint: [module or file to test]
+description: Writes and reviews pytest tests. Use when writing new Python tests, reviewing them, or adding coverage.
+argument-hint: "[module or file to test]"
 allowed-tools:
   - Read
   - Glob
@@ -55,19 +55,19 @@ def test_next_msrv_never_moves_backwards() -> None:
 
 ## Imports
 
-Import `pytest` as a module and reach through it: `pytest.approx`, `pytest.mark.parametrize`,
-`pytest.raises`, `pytest.fixture`.
+Import the pytest helpers a test uses by name: `from pytest import approx, mark, raises`. Keep
+`import pytest` for `@pytest.fixture` and for types such as `pytest.MonkeyPatch`.
 
 ## Floats
 
-Use `pytest.approx` at its default tolerance unless there is a reason not to, and give the
-reason in a named constant with its unit:
+Use `approx` at its default tolerance unless there is a reason not to, and give the reason in a
+named constant with its unit:
 
 ```python
 # Wall-clock jitter between two runs on a shared CI runner, in seconds
 TIMING_TOLERANCE = 0.05
 
-assert elapsed == pytest.approx(EXPECTED_SECONDS, abs=TIMING_TOLERANCE)
+assert elapsed == approx(EXPECTED_SECONDS, abs=TIMING_TOLERANCE)
 assert counts == [1, 2, 4]  # exact values need no approx
 ```
 
@@ -76,7 +76,7 @@ assert counts == [1, 2, 4]  # exact values need no approx
 Collapse tests that differ only in input and expected output:
 
 ```python
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("pinned", "declared", "expected"),
     [("1.97.1", "1.90", "1.95"), ("1.91.0", "1.93", "1.93"), ("2.1.0", "1.90", "2.0")],
 )
@@ -101,10 +101,9 @@ such as the name of the offending value, never the full wording.
 
 Never check for a requirement and `return`: pytest counts that as a pass. Skip visibly instead:
 
-- a platform or a program: `@pytest.mark.skipif(..., reason="...")`, with a reason a reader can
-  act on
-- an optional package: `pytest.importorskip`
-- a whole module: `pytest.skip(..., allow_module_level=True)`
+- a platform or a program: `@mark.skipif(..., reason="...")`, with a reason a reader can act on
+- an optional package: `importorskip("package")`
+- a whole module: `skip("needs <what>", allow_module_level=True)`
 
 ## Docstrings and comments
 

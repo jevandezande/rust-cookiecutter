@@ -1,7 +1,7 @@
 ---
 name: optimize-code
-description: Improve Rust performance when a representative workload shows a meaningful bottleneck.
-argument-hint: [directory or file]
+description: Improves Rust performance when a representative workload shows a meaningful bottleneck. Use when tuning for cache locality and throughput.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

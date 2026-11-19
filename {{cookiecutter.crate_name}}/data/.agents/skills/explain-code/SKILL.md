@@ -1,7 +1,7 @@
 ---
 name: explain-code
-description: Explains existing code by identifying algorithms and cross-referencing docs and specs when they exist.
-argument-hint: [directory or file]
+description: Explains existing code by identifying algorithms and cross-referencing docs and specs when they exist. Use when asked how code works.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

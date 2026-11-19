@@ -1,7 +1,7 @@
 ---
 name: benchmark-code
-description: Guidelines for measuring performance with the workspace's criterion benches.
-argument-hint: [directory or file]
+description: Measures performance with the workspace's criterion benches. Use when timing code or comparing implementations.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

@@ -47,7 +47,9 @@ A generated project has `crates/core` (pure Rust), `crates/py` (the Python bound
 
 ## Setup
 
-Generate on Linux or macOS; the post-gen hook creates a symlink. Install `mise`, `rustup`, and `uv`.
+Generate on Linux or macOS; the post-gen hook creates a symlink. Install `mise`, `rustup`, and
+`uv`, and optionally the [GitHub CLI](https://cli.github.com/), which is required when
+`github_setup` is used.
 
 ```sh
 curl https://mise.run | sh
@@ -72,18 +74,21 @@ uvx cookiecutter gh:jevandezande/rust-cookiecutter
 
 The cookiecutter will automagically:
 
-- Writes the project from the answers
-- Initializes git
-- Pins the Rust version rustup resolved, and declares an older MSRV
-- Adds requested Rust dependencies with `cargo add`, and Python packages with `uv add`
-- Creates the Python environment with `uv sync`
-- Builds the workspace, pinning the interpreter pyo3 links against
-- Trusts `mise.toml` and pins the dev tools in `mise.lock`
-- Installs pre-commit and pre-push hooks with prek
-- Sets up the chosen coding agent, if any
-- Runs the project's own commit and push hooks, tests included, and reports anything they flag
-- Makes the initial commit
-- Adds the `origin` remote and, if requested, creates the GitHub repo and pushes
+- Write the project from the answers
+- Initialize git
+- Pin the Rust version rustup resolved, and declare an older MSRV
+- Add the requested Rust dependencies with `cargo add`, and Python packages with `uv add`
+- Create the Python environment with `uv sync`
+- Build the workspace, pinning the interpreter pyo3 links against
+- Trust `mise.toml` and pin the dev tools in `mise.lock`
+- Install pre-commit and pre-push hooks with prek
+- Set up Claude Code and Codex: `AGENTS.md`, `STATE.md`, skills in `.agents/skills/` with `.claude/skills/` a symlink to it, and a formatting hook for each agent
+- Run the project's own commit and push hooks, tests included, and report anything they flag
+- Make the initial commit
+- Add the `origin` remote and, if requested, create the GitHub repository and push
+
+Cookiecutter deletes the output directory when a hook fails. Keep it with
+`--keep-project-on-failure`.
 
 ## Options
 
@@ -99,7 +104,7 @@ The cookiecutter will automagically:
 | `description` | One-line crate description; falls back to `project_name` |
 | `keywords` | Space-separated crates.io keywords, max 5 |
 | `license` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, or `None`. `None` is proprietary, not unlicensed: `LICENSE` is an all-rights-reserved notice, `Cargo.toml` declares `LicenseRef-Proprietary`, and the crates are `publish = false` |
-| `github_setup` | Create the GitHub repo as `private`, `internal`, `public`, or `None`. The repo is `github_username/crate_name`, so `internal` needs `github_username` to be an organization |
+| `github_setup` | Create the GitHub repository as `private`, `internal`, `public`, or `None`. The repository is `github_username/crate_name`, so `internal` needs `github_username` to be an organization |
 | `release_ci` | `binaries` (tagged GitHub release with checksums and provenance), `crates.io` (Trusted Publishing), `pypi` (maturin wheels and an sdist, Trusted Publishing), or `None`. `binaries` requires `crate_type=both`; `crates.io` requires an open-source license; `pypi` requires `python_interop=extension` |
 
 `author_name` and `github_username` are required; generation fails if either is blank.

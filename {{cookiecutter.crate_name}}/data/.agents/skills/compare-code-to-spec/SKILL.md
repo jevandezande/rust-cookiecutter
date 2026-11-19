@@ -1,7 +1,7 @@
 ---
 name: compare-code-to-spec
-description: Review Rust behavior against an existing spec and report meaningful gaps or changed assumptions.
-argument-hint: <spec-file-or-module-name>
+description: Reviews Rust behavior against an existing spec and reports meaningful gaps or changed assumptions. Use when auditing an implementation against its spec.
+argument-hint: "<spec-file-or-module-name>"
 allowed-tools:
   - Read
   - Glob

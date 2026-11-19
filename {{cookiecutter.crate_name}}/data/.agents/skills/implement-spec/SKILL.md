@@ -1,7 +1,7 @@
 ---
 name: implement-spec
-description: Implement an existing Rust specification, checking behavior and adapting design as evidence emerges.
-argument-hint: <spec-file>
+description: Implements an existing Rust specification, checking behavior and adapting design as evidence emerges. Use when a spec is ready to build.
+argument-hint: "<spec-file>"
 allowed-tools:
   - Read
   - Glob

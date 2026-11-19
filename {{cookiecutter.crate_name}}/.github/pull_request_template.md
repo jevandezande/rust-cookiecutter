@@ -2,7 +2,7 @@
 
 ## For reviewers
 
-<!-- Decisions worth weighing, tradeoffs, and anything risky. -->
+<!-- Decisions worth weighing, tradeoffs, and anything risky. Delete the section if there is none. -->
 
 ## Follow-ups
 

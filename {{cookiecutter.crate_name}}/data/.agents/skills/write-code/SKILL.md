@@ -1,7 +1,7 @@
 ---
 name: write-code
-description: Write idiomatic Rust for this workspace, with clear APIs, ownership, errors, and boundaries.
-argument-hint: [directory or file]
+description: Writes idiomatic Rust with clear APIs, ownership, errors, and boundaries. Use when writing new Rust, reviewing it, or editing it.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

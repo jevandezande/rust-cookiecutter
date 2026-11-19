@@ -1,7 +1,6 @@
 ---
 name: async-workflows
-description: Run and monitor long builds, tests, benchmarks, or profiles without losing their results.
-argument-hint: None
+description: Runs and monitors long builds, tests, benchmarks, or profiles without losing their results. Use when a command may outlast a turn.
 allowed-tools:
   - Read
   - Bash

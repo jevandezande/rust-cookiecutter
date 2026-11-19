@@ -141,6 +141,39 @@ jobs:
           mise run all
           uv run prek run -a --stage pre-push
 
+      - name: Check the files the options select
+        shell: bash
+        working-directory: ../rust-project
+        run: |
+          test -f AGENTS.md
+          test -f STATE.md
+          # license=None writes a proprietary notice, not nothing
+          test -f LICENSE
+          if [ "${{ matrix.release_ci }}" = "None" ]; then
+            test ! -e .github/workflows/release.yml
+          else
+            test -f .github/workflows/release.yml
+          fi
+          test -z "$(compgen -G '.github/workflows/release-*.yml')"
+          if [ "${{ matrix.crate_type }}" = "lib" ]; then
+            test ! -e crates/cli
+          else
+            test -d crates/cli
+          fi
+          if [ "${{ matrix.python_interop }}" = "none" ]; then
+            test ! -e crates/py
+          else
+            test -d crates/py
+          fi
+          test -f .agents/skills/write-code/SKILL.md
+          test -L .claude/skills
+          test .claude/skills -ef .agents/skills
+          test -f .claude/skills/write-code/SKILL.md
+          test -f .claude/settings.json
+          test -f .codex/hooks.json
+          test ! -f CLAUDE.md
+          test ! -e data
+
       # The MSRV trails the pinned toolchain by MSRV_LAG minors. Only a leg with dependencies can
       # catch one of them moving its own rust-version past that window, which would break the
       # generated msrv job on a project's first push

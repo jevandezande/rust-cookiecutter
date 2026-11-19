@@ -1,4 +1,4 @@
-"""Hooks to run before generating the project."""
+"""Hooks to run before generating project."""
 
 import re
 

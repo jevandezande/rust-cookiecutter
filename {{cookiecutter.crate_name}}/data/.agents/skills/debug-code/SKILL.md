@@ -1,7 +1,7 @@
 ---
 name: debug-code
-description: Debugging workflow for runtime errors, panics, and Rust-specific issues.
-argument-hint: [error description or file]
+description: Diagnoses runtime errors, panics, and Rust-specific issues. Use when something fails and the cause is unclear.
+argument-hint: "[error description or file]"
 allowed-tools:
   - Read
   - Glob

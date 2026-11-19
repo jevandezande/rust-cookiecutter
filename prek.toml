@@ -1,15 +1,16 @@
 #:schema https://www.schemastore.org/prek.json
 exclude = '\.venv/'
+default_install_hook_types = ["pre-commit", "pre-push"]
 default_stages = ["pre-commit", "pre-push"]
 
 [[repos]]
 repo = "builtin"
 hooks = [
+    { id = "trailing-whitespace", priority = 0 },
+    { id = "end-of-file-fixer", priority = 0 },
     { id = "check-toml", exclude = '\{\{cookiecutter\.crate_name\}\}/.*(Cargo|pyproject|mise)\.toml', priority = 0 },
     { id = "check-yaml", exclude = '\{\{cookiecutter\.crate_name\}\}/\.github/workflows/test\.yml', priority = 0 },
     { id = "check-merge-conflict", priority = 0 },
-    { id = "end-of-file-fixer", priority = 0 },
-    { id = "trailing-whitespace", priority = 0 },
 ]
 
 [[repos]]
@@ -37,7 +38,7 @@ priority = 10
 id = "rumdl-check"
 name = "rumdl check"
 language = "system"
-entry = "uv run rumdl check ."
+entry = "uv run rumdl check . --fix"
 types = ["markdown"]
 pass_filenames = false
 priority = 11
@@ -76,4 +77,5 @@ language = "system"
 entry = "uv run pytest"
 always_run = true
 pass_filenames = false
+stages = ["pre-push"]
 priority = 41

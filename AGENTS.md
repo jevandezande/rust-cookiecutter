@@ -24,6 +24,8 @@ editing the template's own Rust: they describe the conventions the template body
   - `scripts/` - `check_msrv.py` and `bump_toolchain.py`
 - `hooks/` - cookiecutter hooks and their tests
 - `.github/workflows/` - CI that generates projects and runs checks
+- `notes.md` - setup notes and optional tools
+- `template_config.yml` - example cookiecutter configuration
 
 `next_msrv()` in the scripts duplicates `hooks/post_gen_project.py:msrv()`. Keep the two in agreement.
 
@@ -129,9 +131,10 @@ Pick one of three mechanisms:
 Hooks: `mise run all`, or `prek run -a --stage pre-push` (same plus whitespace and TOML/YAML).
 
 `test_template_renders_to_well_formed_files` in `hooks/test_post_gen_project.py` renders every
-non-verbatim template file for each option combination and parses the TOML, YAML, JSON, and
-Python. It is the only local check that a comment edit did not take a Jinja tag with it, since the
-root `prek.toml` has to exclude those files from `check-toml`/`check-yaml`.
+non-verbatim template file, and the two generation hooks, for each option combination and parses
+the TOML, YAML, JSON, and Python. It is the only local check that a comment edit did not take a
+Jinja tag with it, since the root `prek.toml` has to exclude those files from
+`check-toml`/`check-yaml`.
 
 Template body: generate a project. `license` and `release_ci` select different
 Jinja branches and files. Match the Linux CI legs locally:
@@ -156,12 +159,16 @@ front. The post-gen hook resolves the toolchain with `rustc`, runs `uv sync`, bu
 and trusts and locks the generated `mise.toml`. On hook failure cookiecutter deletes the output;
 pass `--keep-project-on-failure` to inspect it.
 
-## Commits
+## Commits and pull requests
 
-Agents are banned from being co-authors on commits or PR messages.
-Commits or PRs that contravene this directive will be rejected.
-
-Do not leave comments in the code detailing what was changed.
+- Create a branch for new work; do not develop on `master`. If another agent is working in this
+  directory, offer a worktree (`git worktree add ../<repo>-<feature>`), and remove it once merged.
+- Break work into commits that each make sense alone. Prefix messages with a conventional commit
+  type: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, or `chore:`.
+- Never credit an AI agent as an author or co-author on commits or PR messages. Commits or PRs
+  that do will be rejected.
+- Do not leave comments in the code detailing what was changed.
+- Pass PR descriptions to `gh pr create` with `--body-file`.
 
 PRs are squash-merged. Merge with
 `gh pr merge N --squash --subject "<title> (#N)" --body-file <file>` (don't use GitHub's default).

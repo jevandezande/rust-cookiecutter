@@ -1,7 +1,7 @@
 ---
 name: generate-spec
-description: Write a Rust implementation spec when behavior, constraints, and acceptance cases need a durable agreement.
-argument-hint: <method-doc-or-feature>
+description: Writes a Rust implementation spec when behavior, constraints, and acceptance cases need a durable agreement. Use when specifying substantial feature or method behavior.
+argument-hint: "<method-doc-or-feature>"
 allowed-tools:
   - Read
   - Glob

@@ -16,24 +16,11 @@ Install `mise`, `rustup`, and `uv` following the README [Setup](README.md#setup)
 
 ## Cookiecutter
 
-Use `uvx` to fetch and run cookiecutter on demand:
-
-```sh
-uvx cookiecutter gh:jevandezande/rust-cookiecutter
-```
-
-To keep it around:
+The [README](README.md) runs cookiecutter with `uvx`, which needs no install.
+To install it globally instead:
 
 ```sh
 uv tool install cookiecutter
-```
-
-## When generation fails
-
-Cookiecutter deletes the output directory when a hook raises. Keep it with:
-
-```sh
-uvx cookiecutter gh:jevandezande/rust-cookiecutter --keep-project-on-failure
 ```
 
 ## Configuring Rust Cookiecutter

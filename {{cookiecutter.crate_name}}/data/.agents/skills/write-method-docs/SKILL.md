@@ -1,7 +1,7 @@
 ---
 name: write-method-docs
-description: Writes and revises scientific method documentation with equations, algorithms, performance characteristics, and memory layouts. Use when method documentation is requested.
-argument-hint: [topic or target doc path]
+description: Writes and revises scientific method documentation with equations, algorithm sketches, and implementation-status notes. Use when method documentation is requested.
+argument-hint: "[topic or target doc path]"
 allowed-tools:
   - Read
   - Glob
@@ -36,6 +36,7 @@ Do not use this skill for:
 - API-only documentation (use `rustdoc` directly).
 - Quickstart guides or installation docs.
 - Changelogs or release notes.
+- Pure implementation architecture documents unless explicitly requested.
 
 ## Core Principles
 

@@ -1,7 +1,7 @@
 ---
 name: test-code
-description: Guidelines for testing Rust in this workspace, including the Python boundary.
-argument-hint: [directory or file]
+description: Writes and reviews Rust tests, including the Python boundary. Use when writing new Rust tests, reviewing them, or adding coverage.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob
@@ -45,8 +45,8 @@ them, not for a single extra `#[test]`.
 
 ## 5. Tests When Missing Hardware
 
-Tests may check for a device, a program, or a file and returns early if missing and libtest can
-count that as a pass. Gate it so the run shows what it skipped, and give an actionable reason.
+Never check for a device, a program, or a file and `return`: libtest counts that as a pass. Gate
+the test so the run shows what it skipped, with a reason a reader can act on:
 
 - Platform or an optional feature:
   `#[cfg_attr(not(target_os = "linux"), ignore = "needs Linux")]`. Use `#[cfg(...)]` only when

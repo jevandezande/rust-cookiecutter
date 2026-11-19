@@ -128,6 +128,9 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: [wheels, sdist, test]
+    # Name it on the trusted publisher, so only this environment's runs can publish
+    environment:
+      name: pypi
     permissions:
       # Trusted Publishing swaps this OIDC token for a short-lived upload token, so there is no
       # PyPI API token to store. The publish action also attests provenance with it

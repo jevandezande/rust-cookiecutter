@@ -1,7 +1,7 @@
 ---
 name: write-python
-description: Write or review Python in this workspace. Use when writing new Python, reviewing it, or editing it.
-argument-hint: [directory or file]
+description: Writes and reviews Python. Use when writing new Python, reviewing it, or editing it.
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

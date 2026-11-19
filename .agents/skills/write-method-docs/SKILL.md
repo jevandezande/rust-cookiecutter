@@ -1,7 +1,14 @@
 ---
 name: write-method-docs
-description: Write or revise scientific method documentation with equations, algorithm sketches, and implementation-status notes.
+description: Writes and revises scientific method documentation with equations, algorithm sketches, and implementation-status notes. Use when method documentation is requested.
 argument-hint: "[topic or target doc path]"
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Edit
+  - Write
+  - Bash
 ---
 
 # Writing Scientific Method Documentation

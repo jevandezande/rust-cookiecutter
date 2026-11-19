@@ -5,6 +5,7 @@ from pathlib import Path
 import bump_toolchain
 import pytest
 from bump_toolchain import MSRVS, PINS, read_version, write_version
+from pytest import raises
 
 BADGES = "[![Rust: 1.90+](https://img.shields.io/badge/rust-1.90%2B)](https://www.rust-lang.org)\n"
 
@@ -49,7 +50,7 @@ def test_write_version_rejects_a_file_without_one(project: Path) -> None:
     """Raise rather than report success over a file the pattern no longer matches."""
     (project / "README.md").write_text("no badge here\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match=r"matches nothing in README\.md"):
+    with raises(ValueError, match=r"matches nothing in README\.md"):
         write_version(*MSRVS[1], "1.95")
 
 
@@ -57,5 +58,5 @@ def test_read_version_rejects_a_file_without_one(project: Path) -> None:
     """Raise rather than silently skip a file the pattern no longer matches."""
     (project / "Cargo.toml").write_text("[workspace]\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match=r"matches nothing in Cargo\.toml"):
+    with raises(ValueError, match=r"matches nothing in Cargo\.toml"):
         read_version(*MSRVS[0])

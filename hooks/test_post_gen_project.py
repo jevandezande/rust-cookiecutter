@@ -16,7 +16,9 @@ from types import SimpleNamespace
 
 import pytest
 import yaml
-from jinja2 import Environment, Template
+from cookiecutter.environment import StrictEnvironment
+from jinja2 import Template
+from pytest import mark, raises
 
 from hooks import post_gen_project, pre_gen_project
 
@@ -64,7 +66,7 @@ def test_read_write_rejects_a_missing_placeholder(crate: Path) -> None:
     """Raise rather than leave a renamed placeholder's replacement silently unapplied."""
     (crate / "Cargo.toml").write_text('rust-version = "1.90"\n', encoding="utf-8")
 
-    with pytest.raises(ValueError, match=re.escape("'{rust_msrv}' not found in Cargo.toml")):
+    with raises(ValueError, match=re.escape("'{rust_msrv}' not found in Cargo.toml")):
         post_gen_project.read_write("Cargo.toml", "{rust_msrv}", "1.95")
 
 
@@ -74,7 +76,7 @@ def test_rust_version_rejects_unparseable_output(monkeypatch: pytest.MonkeyPatch
         post_gen_project, "call", lambda *_, **__: SimpleNamespace(stdout="not a version")
     )
 
-    with pytest.raises(ValueError, match="Unable to parse rust version"):
+    with raises(ValueError, match="Unable to parse rust version"):
         post_gen_project.rust_version()
 
 
@@ -156,7 +158,7 @@ def template(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-@pytest.mark.parametrize("interop", [mode.value for mode in post_gen_project.Interop])
+@mark.parametrize("interop", [mode.value for mode in post_gen_project.Interop])
 def test_every_mode_ships_a_fragment_for_every_site(template: Path, interop: str) -> None:
     """Leave no placeholder behind in any mode.
 
@@ -178,11 +180,11 @@ def test_set_interop_fails_on_a_missing_fragment(crate: Path) -> None:
     interop = interop_mode(crate, "## Boundary\n")
     (interop / "fragments" / "agents.md.in").unlink()
 
-    with pytest.raises(FileNotFoundError, match=r"agents\.md\.in"):
+    with raises(FileNotFoundError, match=r"agents\.md\.in"):
         post_gen_project.set_interop("embedded")
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("crate_type", "expected"),
     [
         ("lib", {"core", "py"}),
@@ -210,7 +212,7 @@ def test_set_crate_type_keeps_the_right_workspace_members(
     assert (scripts / "test_smoke_bundle.py").exists() is (crate_type != "lib")
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("release_ci", "python_interop", "kept"),
     [
         ("binaries", "embedded", "release-binaries.yml"),
@@ -242,7 +244,7 @@ def test_set_release_ci_keeps_one_workflow(
         assert (workflows / "release.yml").read_text(encoding="utf-8") == kept
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("release_ci", "interop"), list(product(post_gen_project.ReleaseCi, post_gen_project.Interop))
 )
 def test_release_workflows_and_pre_gen_agree(
@@ -282,7 +284,7 @@ def test_set_license_copies_and_formats(tmp_path: Path, monkeypatch: pytest.Monk
     assert "{{cookiecutter.author_name}}" in license_contents
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("option", "enum", "normalize"),
     [
         ("crate_type", post_gen_project.CrateType, str),
@@ -330,7 +332,7 @@ def test_set_license_rejects_unknown(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     monkeypatch.chdir(tmp_path)
 
-    with pytest.raises(ValueError, match="WTFPL"):
+    with raises(ValueError, match="WTFPL"):
         post_gen_project.set_license("WTFPL")
 
     assert not (tmp_path / "LICENSE").exists()
@@ -416,7 +418,7 @@ def test_claude_and_codex_run_the_same_edit_hooks() -> None:
     assert claude["hooks"] == codex["hooks"]
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("python_interop", "expected", "pinned"),
     [
         ("embedded", ["uv python find", "uv run cargo build --workspace"], True),
@@ -492,7 +494,7 @@ def test_git_initial_commit_skips_the_hooks(monkeypatch: pytest.MonkeyPatch) -> 
     assert calls == ["git add .", "git commit --no-verify -m Setup"]
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("github_setup", "expected"), [("None", False), ("private", True), ("public", True)]
 )
 def test_check_prerequisites_requires_gh_only_for_github_setup(
@@ -534,7 +536,7 @@ def test_github_setup_rejects_unknown_privacy(monkeypatch: pytest.MonkeyPatch) -
     calls: list[str] = []
     monkeypatch.setattr(post_gen_project, "call", lambda cmd, **_: calls.append(cmd))
 
-    with pytest.raises(ValueError, match="privacy='pubic'"):
+    with raises(ValueError, match="privacy='pubic'"):
         post_gen_project.github_setup("pubic")
 
     assert calls == []
@@ -580,7 +582,7 @@ def test_check_program_reports_the_install_command(monkeypatch: pytest.MonkeyPat
 
     monkeypatch.setattr(post_gen_project, "call", missing)
 
-    with pytest.raises(OSError, match=re.escape("install with `https://rustup.rs`")):
+    with raises(OSError, match=re.escape("install with `https://rustup.rs`")):
         post_gen_project.check_program("cargo --version", "https://rustup.rs")
 
 
@@ -592,11 +594,11 @@ def test_check_program_reports_the_exit_code(monkeypatch: pytest.MonkeyPatch) ->
 
     monkeypatch.setattr(post_gen_project, "call", broken)
 
-    with pytest.raises(RuntimeError, match="`cargo --version` exited with 127"):
+    with raises(RuntimeError, match="`cargo --version` exited with 127"):
         post_gen_project.check_program("cargo --version", "https://rustup.rs")
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("protocol", "expected"),
     [
         ("git", "git@github.com:user/repo.git"),
@@ -662,7 +664,9 @@ def test_add_python_dependencies_skips_empty_spec(monkeypatch: pytest.MonkeyPatc
 
 
 # What `_copy_without_render` ships verbatim; everything else goes through Jinja
-VERBATIM = ("data/.agents/skills", ".github/workflows/release-")
+VERBATIM = json.loads((ROOT / "cookiecutter.json").read_text(encoding="utf-8"))[
+    "_copy_without_render"
+]
 
 # Options that select Jinja branches; rest render the same for every value
 OPTION_COMBINATIONS = list(
@@ -705,19 +709,33 @@ def compiled_templates() -> list[tuple[str, Template]]:
     Returns:
         Path relative to repo root and compiled template, per file
     """
-    env = Environment(keep_trailing_newline=True)
-    files = [p for p in TEMPLATE.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
-    files += (ROOT / "hooks").glob("*.py")
+    env = StrictEnvironment(keep_trailing_newline=True)
+    files = [
+        p
+        for p in TEMPLATE.rglob("*")
+        if p.is_file() and "__pycache__" not in p.parts and not copied_verbatim(p)
+    ]
+    files += [ROOT / "hooks" / name for name in ("pre_gen_project.py", "post_gen_project.py")]
     return [
         (p.relative_to(ROOT).as_posix(), env.from_string(p.read_text(encoding="utf-8")))
         for p in files
-        if not any(v in p.as_posix() for v in VERBATIM)
     ]
 
 
-@pytest.mark.parametrize(
-    ("interop", "crate_type", "license_name", "release_ci"), OPTION_COMBINATIONS
-)
+def copied_verbatim(path: Path) -> bool:
+    """Check whether `_copy_without_render` covers a template file, as cookiecutter matches it.
+
+    Args:
+        path: file under template root
+
+    Returns:
+        Whether cookiecutter copies file without rendering it
+    """
+    relative = path.relative_to(TEMPLATE)
+    return any(relative.full_match(glob) or relative.is_relative_to(glob) for glob in VERBATIM)
+
+
+@mark.parametrize(("interop", "crate_type", "license_name", "release_ci"), OPTION_COMBINATIONS)
 def test_template_renders_to_well_formed_files(
     interop: str, crate_type: str, license_name: str, release_ci: str
 ) -> None:
@@ -751,7 +769,7 @@ def test_template_renders_to_well_formed_files(
                 pass
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     ("description", "purpose"),
     [
         ("Scores things, quickly", "Purpose: Scores things, quickly\n"),
@@ -765,7 +783,7 @@ def test_agents_md_renders_without_directives(description: str, purpose: str) ->
     have whichever agent opens the repo first rewrite the file in the middle of another task.
     """
     context = cookiecutter_context(description=description)
-    template = Environment().from_string((TEMPLATE / "data" / "AGENTS.md").read_text("utf-8"))
+    template = StrictEnvironment().from_string((TEMPLATE / "data" / "AGENTS.md").read_text("utf-8"))
 
     text = template.render(cookiecutter=context)
 

@@ -101,9 +101,9 @@ tasks rather than dropping `UV_LOCKED` by hand.
 
 ## When in doubt
 
+- Check the relevant skill files in `.agents/skills/`
 - Run individual tools to find the problem
 - Ask the user to clarify ambiguous requirements
-- Check the relevant skill files in `.agents/skills/`
 
 ## Repository overview
 
@@ -178,10 +178,10 @@ ty. Markdown is checked by rumdl with line length disabled.
 
 ## Agent hooks
 
-Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`) each run `cargo fmt` and
-`ruff format` after every file edit, so edits need no manual `mise run fmt`. Keep the two hooks
-identical. Codex runs a project hook only once the project is trusted and the hook approved in
-`/hooks`.
+Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`) each run
+`mise run fmt && mise run py-fmt && mise run py-lint -- --fix` after every file edit, so edits need
+no manual formatting. Keep the two hooks identical. Codex runs a project hook only once the
+project is trusted and the hook approved in `/hooks`.
 
 Clippy and ty are too slow for every edit. They run on commit through prek, and the test suite on
 push and in CI.
@@ -189,15 +189,17 @@ push and in CI.
 Claude Code's `attribution` setting is empty, so its commits and PRs carry no agent trailer.
 Machine-local Claude Code overrides go in `.claude/settings.local.json` (gitignored).
 
-## Miscellaneous
+## Commits and pull requests
 
-Agents are banned from being authors on commits or PR messages.
-Commits or PRs that contravene this directive will be rejected.
-
-Follow `.github/pull_request_template.md` for PR descriptions. With `gh pr create`, fill every
-section and pass the text with `--body-file`.
-
-Do not leave comments in the code detailing what was changed.
+- Create a branch for new work; do not develop on `master`. If another agent is working in this
+  directory, offer a worktree (`git worktree add ../<repo>-<feature>`), and remove it once merged.
+- Break work into commits that each make sense alone. Prefix messages with a conventional commit
+  type: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, or `chore:`.
+- Never credit an AI agent as an author or co-author on commits or PR messages. Commits or PRs
+  that do will be rejected.
+- Do not leave comments in the code detailing what was changed.
+- Follow `.github/pull_request_template.md` for PR descriptions. Fill the sections that apply,
+  delete empty sections, and pass the text to `gh pr create` with `--body-file`.
 
 PRs are squash-merged. Merge with
 `gh pr merge N --squash --subject "<title> (#N)" --body-file <file>` (don't use GitHub's default).

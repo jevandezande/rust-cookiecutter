@@ -1,7 +1,7 @@
 ---
 name: plan-method-docs
-description: Research a scientific or numerical method when existing sources do not establish its requirements or algorithmic tradeoffs.
-argument-hint: <method-or-topic-name>
+description: Researches a scientific or numerical method when existing sources do not establish its requirements or algorithmic tradeoffs. Use before writing method docs for a new method.
+argument-hint: "<method-or-topic-name>"
 allowed-tools:
   - Read
   - Glob
@@ -24,9 +24,12 @@ behavior and tests need not begin with a literature review.
 ### Phase 1: Literature Review
 
 1. Use `WebFetch` to find primary sources and reliable reviews on the topic (`$ARGUMENTS`).
+
 2. Read enough of the methods to answer the project's mathematical, numerical, and algorithmic
    questions. Compare variants that could change the implementation choice.
+
 3. For a large review, split independent sources only when parallel work is useful and authorized.
+
 4. Reading PDFs:
    - The `Read` tool reads local PDFs. Download papers to `docs/papers/` and read them there.
    - To extract text with the LaTeX equations intact, run
@@ -34,6 +37,7 @@ behavior and tests need not begin with a literature review.
      the PDF. `uvx` needs no installation.
    - arXiv papers often have an HTML version at `https://arxiv.org/html/XXXX.XXXXX`. Prefer it
      with `WebFetch` when it exists.
+
 5. Paywalled papers. Before declaring a source inaccessible, check these in order:
    - arXiv or a field preprint server: search by title or author.
    - Unpaywall: fetch `https://api.unpaywall.org/v2/{DOI}?email=user@example.com` with
@@ -46,6 +50,7 @@ behavior and tests need not begin with a literature review.
 
    If the paper is still inaccessible, take what the abstract and preview offer, record the DOI
    and citation, and move on.
+
 6. `WebFetch` limitations:
    - It may truncate long pages. Fetch specific sections through anchored URLs
      (e.g. `https://en.wikipedia.org/wiki/Topic#Section`) rather than whole pages.

@@ -10,8 +10,8 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any, Literal, assert_never
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+logger = logging.getLogger("post_gen_project")
 
 
 type GitProtocol = Literal["git", "https"]
@@ -331,6 +331,18 @@ def add_python_dependencies(
         call(f"uv add --no-sync {dependencies}")
 
 
+def git_init(default_branch: str = DEFAULT_BRANCH) -> None:
+    """Initialize git repository.
+
+    Branch is set explicitly, to match branch generated workflows, README badges, and upstream
+    configuration reference.
+
+    Args:
+        default_branch: name of initial branch
+    """
+    call(f"git init -b {default_branch}")
+
+
 def check_program(program: str, install_str: str, **run_kwargs: Any) -> None:
     """Check that a program is installed.
 
@@ -414,6 +426,11 @@ def lock_dev_tools() -> None:
     call(f"mise lock --platform {LOCK_PLATFORMS}")
 
 
+def git_hooks() -> None:
+    """Install pre-commit and pre-push hooks with prek."""
+    call("uv run prek install")
+
+
 def setup_agent_files() -> None:
     """Write AGENTS.md, STATE.md, skills, and hooks where Codex and Claude Code each discover them.
 
@@ -427,6 +444,11 @@ def setup_agent_files() -> None:
     shutil.copytree("data/.claude", ".claude")
     shutil.copytree("data/.codex", ".codex")
     Path(".claude/skills").symlink_to(Path("..") / AGENT_SKILLS, target_is_directory=True)
+
+
+def remove_data_dir() -> None:
+    """Remove post-gen staging directory."""
+    shutil.rmtree("data")
 
 
 def format_sources() -> None:
@@ -494,8 +516,10 @@ def github_setup(
 ) -> None:
     """Create repository on GitHub with GitHub CLI.
 
-    Failure is logged rather than raised: cookiecutter deletes output directory when a hook
-    raises, and project itself is finished and committed by this point.
+    Repository is qualified with its owner, so it lands under `github_username` rather than
+    whoever GitHub CLI is authenticated as. Failure is logged rather than raised: cookiecutter
+    deletes output directory when a hook raises, and project itself is finished and committed by
+    this point.
 
     Args:
         privacy: repository visibility, one of "private", "internal", or "public"
@@ -541,8 +565,8 @@ then add this repository as a trusted publisher on crate at https://crates.io"""
         logger.info(
             """
 Publishing uses Trusted Publishing (OIDC). Add a pending publisher at
-https://pypi.org/manage/account/publishing/ before first `v*` tag, naming this GitHub repository
-and `release.yml` as workflow.
+https://pypi.org/manage/account/publishing/ before first `v*` tag, naming this GitHub repository,
+`release.yml` as workflow, and `pypi` as environment.
 
 See https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/
 """
@@ -558,7 +582,7 @@ def main() -> None:
     set_crate_type("{{cookiecutter.crate_type}}")
     set_release_ci("{{cookiecutter.release_ci}}", "{{cookiecutter.python_interop}}")
 
-    call(f"git init -b {DEFAULT_BRANCH}")
+    git_init()
 
     set_rust_version()
 
@@ -571,9 +595,9 @@ def main() -> None:
     trust_mise()
     lock_dev_tools()
 
-    call("uv run prek install")
+    git_hooks()
     setup_agent_files()
-    shutil.rmtree("data")
+    remove_data_dir()
 
     format_sources()
 

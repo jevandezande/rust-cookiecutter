@@ -1,7 +1,7 @@
 ---
 name: write-docstrings
 description: Writes and reviews Google-style Python docstrings. Use when writing new docstrings, reviewing existing ones, or editing them.
-argument-hint: [directory or file]
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob

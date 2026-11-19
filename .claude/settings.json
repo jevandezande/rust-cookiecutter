@@ -1,5 +1,9 @@
 {
-  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "hooks": {
     "PostToolUse": [
       {
@@ -7,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --no-sync ruff format --quiet hooks && uv run --no-sync ruff check hooks",
+            "command": "uv run --no-sync ruff format hooks && uv run --no-sync ruff check hooks --fix",
             "statusMessage": "Formatting and linting with ruff"
           }
         ]

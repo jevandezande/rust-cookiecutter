@@ -1,7 +1,7 @@
 ---
 name: write-doc-comments
 description: Writes and reviews rustdoc doc comments. Use when writing new doc comments, reviewing existing ones, or editing them.
-argument-hint: [directory or file]
+argument-hint: "[directory or file]"
 allowed-tools:
   - Read
   - Glob
